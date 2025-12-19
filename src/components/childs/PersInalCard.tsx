@@ -4,6 +4,7 @@ import "swiper/css";
 import TransparentDrawer from "./TransparentDrawer";
 import { MusicPlayer } from "./MusicPlayer";
 import type { MusicPlayerHandle } from "./MusicPlayer";
+import { Notepad } from "./Notepad";
 
 
 export function PersonalCard({ person, childItems }) {
@@ -28,6 +29,10 @@ export function PersonalCard({ person, childItems }) {
     const [isPlaying, setIsPlaying] = useState(false);
     const musicPlayerRef = useRef<MusicPlayerHandle | null>(null);
 
+    const swiperRef = useRef<any>(null);
+    const [mapBeingDragged, setMapBeingDragged] = useState(false);
+
+    const onMapDrag = (dragging: boolean) => setMapBeingDragged(dragging);
 
 
 
@@ -118,6 +123,7 @@ export function PersonalCard({ person, childItems }) {
                 },
             ]
             : []),
+        { type: "notes", id: "notes-slide" },
         ...nonAudioItems,
     ];
 
@@ -222,6 +228,12 @@ export function PersonalCard({ person, childItems }) {
                         spaceBetween={1}
                         slidesPerView={1}
                         className="flex flex-grow h-full"
+                        
+                        allowTouchMove={!mapBeingDragged}
+                        touchStartPreventDefault={false} 
+                        onSwiper={(swiper) => {
+                            swiperRef.current = swiper;
+                        }}
                         onSlideChange={(swiper) => {
                             if (!musicPinned) {
                                 stopAllMedia();
@@ -318,6 +330,14 @@ export function PersonalCard({ person, childItems }) {
                                         className="w-full h-full rounded-xl"
                                     />
                                 )}
+
+                                {item.type === "notes" && (
+                                    <div className="w-full h-full">
+                                        <Notepad
+                                            onMapDrag={setMapBeingDragged} person={person}                                        />
+                                    </div>
+                                )}
+
 
                                 {/* Foreground text */}
                                 <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-30 text-center">

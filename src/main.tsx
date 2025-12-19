@@ -10,6 +10,8 @@ import { TelemetryProvider } from './lib/TelemetryContext'
 
 import './index.css'
 
+import "leaflet/dist/leaflet.css";
+
 // Create a new router instance
 const router = createRouter({ routeTree })
 
