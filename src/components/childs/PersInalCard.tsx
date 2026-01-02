@@ -80,7 +80,7 @@ export function PersonalCard({ person, childItems }) {
         mediaType: string
     ) {
         try {
-            const VITE_CORE_PATH = "http://localhost:3000";
+            const VITE_CORE_PATH = "https://swiper-backend.onrender.com";
             const endpoint = "media";
             const normalizedMediaType = mediaType.toLowerCase() as
                 | 'video'

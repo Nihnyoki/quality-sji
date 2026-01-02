@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import 'swiper/css'
 
-const VITE_IMAGE_CORE_PATH = "http://localhost:3000/IMAGETHS";
+const VITE_IMAGE_CORE_PATH = "https://swiper-backend.onrender.com/IMAGETHS";
 
 interface FamilyCard {
     person: any;
