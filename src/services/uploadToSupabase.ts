@@ -8,7 +8,11 @@ export async function uploadToSupabase(
   const ext = file.name.split(".").pop();
   const path = `${folder}/${crypto.randomUUID()}.${ext}`;
 
-  await supabase.auth.signInAnonymously();
+  const authResponse = await supabase.auth.signInAnonymously();
+  
+  console.log(` SuperBaseClient sign raw authResonse:`, authResponse);
+  console.log(` `);
+  console.log(` SuperBaseClient sign json authResonse:`, JSON.stringify(authResponse));
 
   const { error } = await supabase.storage
     .from("media")
