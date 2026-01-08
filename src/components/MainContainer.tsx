@@ -1,16 +1,15 @@
 import { Link } from '@tanstack/react-router';
 import React, { useEffect, useRef, useState } from 'react';
-import * as THREE from 'three';
-// @ts-ignore
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import type * as THREE_NS from 'three';
 
 import { BlogPost, qualityPhilosophyPosts } from '../data/qualityPhilosophy';
 import { VideoPost, videoPosts } from '../data/videoPosts';
 import { ProjectPost, projectPosts } from '../data/projectPosts';
 import SlideInPanel from './SlideInPanel';
 import { FaGithub } from 'react-icons/fa'
-const qualitySystemModel = '/public/images/quality-system.glb';
-const telemetryModel = '/public/images/telemetry.glb';
+import PostContent from './PostContent';
+const qualitySystemModel = '/images/quality-system.glb';
+const telemetryModel = '/images/telemetry.glb';
 
 type PostType = 'quality' | 'video' | 'project';
 type PanelContent = { type: PostType; post: BlogPost | VideoPost | ProjectPost } | null;
@@ -24,21 +23,29 @@ const MainContainer: React.FC = () => {
       const container = containerRef.current;
       if (!container) return;
 
-      // Set up the scene, camera, and renderer
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-      const renderer = new THREE.WebGLRenderer({ alpha: true });
-      renderer.setSize(container.clientWidth, container.clientHeight);
-      if (renderer.domElement instanceof HTMLCanvasElement) {
-        renderer.domElement.style.position = 'absolute';
-        renderer.domElement.style.top = '0';
-        renderer.domElement.style.left = '0';
-        renderer.domElement.style.width = '100%';
-        renderer.domElement.style.height = '100%';
-        renderer.domElement.style.display = 'block';
-        container.appendChild(renderer.domElement);
-      }
-      renderer.setClearColor(0x87ceeb, 1);
+      let cancelled = false;
+      let cleanup: null | (() => void) = null;
+
+      const start = async () => {
+        const THREE = await import('three');
+        const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
+        if (cancelled) return;
+
+        // Set up the scene, camera, and renderer
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        if (renderer.domElement instanceof HTMLCanvasElement) {
+          renderer.domElement.style.position = 'absolute';
+          renderer.domElement.style.top = '0';
+          renderer.domElement.style.left = '0';
+          renderer.domElement.style.width = '100%';
+          renderer.domElement.style.height = '100%';
+          renderer.domElement.style.display = 'block';
+          container.appendChild(renderer.domElement);
+        }
+        renderer.setClearColor(0x87ceeb, 1);
 
       // Prepare posts
       const posts: Array<{ id: string; type: PostType; title: string; link: string; delay: number; model: string; }> = [
@@ -48,7 +55,7 @@ const MainContainer: React.FC = () => {
           title: post.title,
           link: `/quality/${post.id}`,
           delay: Math.random() * 5,
-          model: i % 2 === 0 ? qualitySystemModel : telemetryModel,
+          model: post.model ?? (i % 2 === 0 ? qualitySystemModel : telemetryModel),
         })),
         ...videoPosts.map((post: VideoPost, i: number) => ({
           id: post.id,
@@ -70,7 +77,7 @@ const MainContainer: React.FC = () => {
 
       
       const loader = new GLTFLoader();
-      const objects: THREE.Object3D[] = [];
+      const objects: THREE_NS.Object3D[] = [];
       const speedMultipliers = posts.map(() => [0.02, 0.03, 0.04][Math.floor(Math.random() * 3)]);
       const initialXs = posts.map(() => Math.random() * 30 - 15);
       const initialYs = posts.map(() => Math.random() * 16 - 8);
@@ -81,7 +88,7 @@ const MainContainer: React.FC = () => {
           loader.load(
             post.model,
             (gltf: any) => {
-              const model = gltf.scene as unknown as THREE.Object3D;
+              const model = gltf.scene as unknown as THREE_NS.Object3D;
               const box = new THREE.Box3().setFromObject(model);
               const size = new THREE.Vector3();
               box.getSize(size);
@@ -102,7 +109,7 @@ const MainContainer: React.FC = () => {
               }
               const texture = new THREE.CanvasTexture(canvas);
               const titleMaterial = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
-              const titlePlane = new THREE.Mesh(new THREE.PlaneGeometry(4, 1), titleMaterial) as unknown as THREE.Object3D;
+              const titlePlane = new THREE.Mesh(new THREE.PlaneGeometry(4, 1), titleMaterial) as unknown as THREE_NS.Object3D;
               (titlePlane as any).position.set(0, 0.7, 0);
               (titlePlane as any).rotation.x = 0;
               (titlePlane as any).rotation.y = 0;
@@ -120,7 +127,7 @@ const MainContainer: React.FC = () => {
         } else {
           const geometry = new THREE.BoxGeometry(2, 2, 2);
           const material = new THREE.MeshStandardMaterial({ color: 0x0077ff });
-          const mesh = new THREE.Mesh(geometry, material) as unknown as THREE.Object3D;
+          const mesh = new THREE.Mesh(geometry, material) as unknown as THREE_NS.Object3D;
           (mesh as any).position.set(initialXs[index], initialYs[index], -20 - post.delay * 10);
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
@@ -135,7 +142,7 @@ const MainContainer: React.FC = () => {
           }
           const texture = new THREE.CanvasTexture(canvas);
           const titleMaterial = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
-          const titlePlane = new THREE.Mesh(new THREE.PlaneGeometry(4, 1), titleMaterial) as unknown as THREE.Object3D;
+          const titlePlane = new THREE.Mesh(new THREE.PlaneGeometry(4, 1), titleMaterial) as unknown as THREE_NS.Object3D;
           (titlePlane as any).position.set(0, 2.5, 0);
           (mesh as any).add(titlePlane);
           (mesh as any).userData = { link: post.link, postType: post.type, postId: post.id };
@@ -152,8 +159,9 @@ const MainContainer: React.FC = () => {
       scene.add(pointLight);
 
       // Animation
+      let rafId = 0;
       const animate = () => {
-        requestAnimationFrame(animate);
+        rafId = requestAnimationFrame(animate);
         (objects as any).forEach((obj: any, index: number) => {
           if (obj.position) {
             obj.position.z += speedMultipliers[index];
@@ -170,19 +178,21 @@ const MainContainer: React.FC = () => {
       animate();
 
       // Click handler (attach to canvas)
-      const handleClick = (event: MouseEvent) => {
+      const handleClick = (event: Event) => {
+        const mouseEvent = event as MouseEvent;
         console.log('Canvas click event from handleClick');
-        const rect = renderer.domElement.getBoundingClientRect();
+        const canvas = renderer.domElement as HTMLCanvasElement;
+        const rect = canvas.getBoundingClientRect();
         const mouse = new THREE.Vector2(
-          ((event.clientX - rect.left) / rect.width) * 2 - 1,
-          -((event.clientY - rect.top) / rect.height) * 2 + 1
+          ((mouseEvent.clientX - rect.left) / rect.width) * 2 - 1,
+          -((mouseEvent.clientY - rect.top) / rect.height) * 2 + 1
         );
-        const raycaster = new THREE.Raycaster();
+        const raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3());
         raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(objects as any, true);
+        const intersects = raycaster.intersectObjects(objects as any, true) as Array<any>;
         console.log('Intersects:', intersects);
         if (intersects.length > 0) {
-          let obj = intersects[0].object;
+          let obj = intersects[0].object as any;
           let userData = (obj as any).userData || {};
           // Traverse up the parent chain to find userData with postType and postId
           while (obj && (!userData.postType || !userData.postId) && obj.parent) {
@@ -216,17 +226,33 @@ const MainContainer: React.FC = () => {
       };
       window.addEventListener('resize', handleResize);
 
-      return () => {
+      cleanup = () => {
+        cancelAnimationFrame(rafId);
         window.removeEventListener('resize', handleResize);
         renderer.domElement.removeEventListener('click', handleClick);
         if (renderer.domElement instanceof HTMLCanvasElement) {
           container.removeChild(renderer.domElement);
         }
+        renderer.dispose();
+      };
+    };
+
+      const win = window as any;
+      const idleId: number = win.requestIdleCallback
+        ? win.requestIdleCallback(start)
+        : window.setTimeout(start, 0);
+
+      return () => {
+        cancelled = true;
+        if (win.cancelIdleCallback) {
+          win.cancelIdleCallback(idleId);
+        } else {
+          clearTimeout(idleId);
+        }
+        cleanup?.();
       };
     }, []);
 
-    // Debug: log panelOpen and panelContent on each render
-    console.log('RENDER: panelOpen:', panelOpen, 'panelContent:', panelContent);
     return (
       <div className="min-h-screen bg-gray-100 relative">
         {/* Navigation Bar */}
@@ -250,17 +276,27 @@ const MainContainer: React.FC = () => {
         <main className="py-12">
           <SlideInPanel isOpen={panelOpen} onClose={() => setPanelOpen(false)}>
             {panelContent && (
-              <div>
-                <h2 className="text-2xl font-bold mb-2">{panelContent?.post.title}</h2>
-                {panelContent?.post.subtitle && <h3 className="text-lg text-gray-500 mb-2">{panelContent?.post.subtitle}</h3>}
-                <div className="text-xs text-gray-400 mb-4">{panelContent?.post.published}</div>
-                {panelContent?.post.image && (
-                  <img src={panelContent?.post.image} alt={panelContent?.post.title} className="mb-4 rounded shadow" />
-                )}
-                {panelContent?.post.content.map((p: string, idx: number) => (
-                  <p className="mb-2" key={idx}>{p}</p>
-                ))}
-              </div>
+              <article className="font-poppins max-w-4xl">
+                <header className="mb-6">
+                  <h2 className="font-merriweather text-2xl md:text-3xl font-semibold leading-snug text-gray-900">
+                    {panelContent?.post.title}
+                  </h2>
+                  {panelContent?.post.subtitle && (
+                    <p className="mt-2 text-base text-gray-600 leading-relaxed">
+                      {panelContent?.post.subtitle}
+                    </p>
+                  )}
+                  <div className="mt-3 text-xs tracking-wide text-gray-400">
+                    Published {panelContent?.post.published}
+                  </div>
+                </header>
+
+                <PostContent
+                  content={panelContent.post.content}
+                  authorName={panelContent.post.authorName}
+                  authorImage={panelContent.post.authorImage}
+                />
+              </article>
             )}
           </SlideInPanel>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -275,14 +311,14 @@ const MainContainer: React.FC = () => {
 
     <FaGithub size={24} />  </p>
 
-     <Link to="https://github.com/Nihnyoki/" className="inline-block mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-pink-300 transition">Coffe & Code</Link>
+    <a href="https://github.com/Nihnyoki/" target="_blank" rel="noreferrer" className="inline-block mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-pink-300 transition">Coffe & Code</a>
 
 </div>
 
             <div className="bg-white shadow-md rounded-lg p-6">
               <h2 className="text-2xl font-semibold mb-4">Videos</h2>
               <p className="text-gray-600">Videos on quality in the software industry, my personal insights, and more...</p>
-                <Link to="https://www.youtube.com/@NeatNetSpring" className="inline-block mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-pink-300 transition">Put a face to the name</Link>
+                <a href="https://www.youtube.com/@NeatNetSpring" target="_blank" rel="noreferrer" className="inline-block mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-pink-300 transition">Put a face to the name</a>
             </div>
             <div className="bg-white shadow-md rounded-lg p-6">
               <h2 className="text-2xl font-semibold mb-4">Blogs</h2>
