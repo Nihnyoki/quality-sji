@@ -1,0 +1,19 @@
+Personal assessment of the site:
+
+The core interaction is compelling. The three-dimensional landing is memorable, and the slide-in reading panel keeps users in-flow instead of forcing a full navigation.
+
+Typography and structure are now doing real work. Headings, bullets, separators, and the continuous left rail make posts feel like articles, not raw text.
+
+The author footer was a good addition. It reinforces identity and makes the posts feel published.
+
+What still feels a bit off, and where you’ll get the most polish per effort:
+
+One: Visual consistency. Some areas look modern, like the panel and typography, while some home cards and buttons feel more like default Tailwind. Matching spacing and button styles across sections would quickly raise perceived quality.
+
+Two: Content density on wide screens. Widening the panel helps, but very long lines reduce readability. A good next step is a comfortable reading width for paragraphs, while still using the wider space for headings, images, and lists.
+
+Three: Asset path warnings. There are Vite warnings about using slash public slash images paths. It may work locally, but it’s a paper cut that makes builds noisy and can break depending on deployment.
+
+Four: Performance perception. Three.js plus larger GLB files plus a big JavaScript bundle can feel heavy on first load. It works, but code splitting or lazy-loading the three-dimensional scene after first paint would improve perceived performance.
+
+If you want, I can do a quick targeted polish pass: fix remaining public images paths, tighten visual consistency across cards and buttons, and optionally lazy-load the three-dimensional scene.
