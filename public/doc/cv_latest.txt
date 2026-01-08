@@ -1,0 +1,69 @@
+Sandile Joshua Innocent Mnqayi
+
+QA Automation Architect | Software Engineer in Test
+Centurion, Gauteng, South Africa
+Email: wifizi.gokhinki@gmail.com | Mobile: 063 651 6307
+GitHub: https://github.com/Nihnyoki
+YouTube: https://www.youtube.com/channel/UCR8DJ0lguiwKsDIRZ3v_fjw
+
+Professional Summary
+
+QA Automation Architect with over 15 years of experience designing,
+implementing, and scaling quality assurance and test automation
+solutions across banking, telecommunications, SaaS, and enterprise
+systems. Specialist in automation strategy, test architecture, CI/CD
+quality gates, and framework design, with deep hands-on expertise in
+Java-based automation, BDD (Cucumber), API testing, and system
+integration testing.
+
+Core Competencies
+
+- Test Automation Architecture & Framework Design
+- BDD & Living Documentation (Cucumber)
+- API, Backend & Integration Testing
+- CI/CD Quality Gates
+- QA Leadership & Mentorship
+- Agile & Hybrid SDLC
+
+Professional Experience
+
+4-SURE Technology Solutions – QA Lead / Senior QA Engineer (2023 –
+Present)
+• Lead a QA team of 5 engineers in a SaaS environment.
+• Define and execute QA strategy across multiple enterprise clients.
+• Introduce scalable automation frameworks and quality practices.
+Nedbank – Automation Engineer (2020)
+• Delivered desktop, API, and web automation solutions.
+• Designed automation strategies per system context.
+WesBank – Automation Engineer (2018 – 2020)
+• Automated banking APIs and payment mandate systems.
+• Built Java-based automation frameworks.
+ABSA – Web Services Tester (2017 – 2018)
+• API and integration testing within regulated banking systems.
+Kapsch TrafficCom – QA & Third Line Support Engineer (2016 – 2017)
+• End-to-end testing across software and hardware systems.
+Concurrent Systems – Test Lead Engineer (2013 – 2016)
+• Led test strategy and mentored junior engineers.
+
+Education
+
+National Diploma in Electrical Engineering (Telecommunications)
+Mangosuthu University of Technology
+Dean’s Commendation for Academic Excellence
+
+Quality Architecture Philosophy
+
+I believe quality is a system-level architectural concern, not a phase
+in the SDLC. My approach to Quality Architecture focuses on designing
+testability into systems from the outset, using automation as an
+enabling platform rather than a verification afterthought.
+Key principles include:
+• Quality built into architecture, pipelines, and delivery workflows
+• Automation frameworks treated as long-lived platforms
+• Test strategy aligned to risk, business value, and system complexity
+• Observability, telemetry, and feedback loops as first-class quality
+signals
+• Strong collaboration between QA, engineering, product and AI :-)
+I regularly write about Quality Architecture, test automation strategy,
+and system thinking in QA on my blog:
+https://quality-sji.vercel.app/quality-philosophy
