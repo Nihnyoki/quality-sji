@@ -23,9 +23,12 @@ export default function PostContent({ content, authorName, authorImage }: PostCo
     const items = listItems;
     listItems = [];
     blocks.push(
-      <ul key={`ul-${keyBase}`} className="list-disc pl-6 space-y-2">
+      <ul key={`ul-${keyBase}`} className="space-y-2">
         {items.map((item, i) => (
-          <li key={`li-${keyBase}-${i}`} className="text-gray-800 leading-relaxed">
+          <li
+            key={`li-${keyBase}-${i}`}
+            className="relative pl-6 text-zinc-800 leading-relaxed before:absolute before:left-0 before:top-0 before:content-['➤'] before:text-zinc-700 before:drop-shadow-sm"
+          >
             {item}
           </li>
         ))}
@@ -58,8 +61,8 @@ export default function PostContent({ content, authorName, authorImage }: PostCo
         <h2
           key={`h2-${index}`}
           className={[
-            'font-merriweather text-xl md:text-2xl font-semibold text-gray-900 tracking-tight',
-            isFirst ? 'mt-8' : 'mt-10 pt-8 border-t border-gray-200',
+            'font-merriweather text-xl md:text-2xl font-semibold text-zinc-900 tracking-tight',
+            isFirst ? 'mt-8' : 'mt-10 pt-8 border-t border-zinc-200',
           ].join(' ')}
         >
           {trimmed.slice(3)}
@@ -72,7 +75,7 @@ export default function PostContent({ content, authorName, authorImage }: PostCo
       blocks.push(
         <h3
           key={`h3-${index}`}
-          className="font-merriweather text-lg md:text-xl font-semibold text-gray-900 mt-8 pt-6 border-t border-gray-100 tracking-tight"
+          className="font-merriweather text-lg md:text-xl font-semibold text-zinc-900 mt-8 pt-6 border-t border-zinc-100 tracking-tight"
         >
           {trimmed.slice(4)}
         </h3>
@@ -81,7 +84,7 @@ export default function PostContent({ content, authorName, authorImage }: PostCo
     }
 
     blocks.push(
-      <p key={`p-${index}`} className="text-gray-700 leading-relaxed">
+      <p key={`p-${index}`} className="text-zinc-700 leading-relaxed">
         {trimmed}
       </p>
     );
@@ -90,19 +93,19 @@ export default function PostContent({ content, authorName, authorImage }: PostCo
   flushList(content.length + 1);
 
   return (
-    <div className="space-y-5 border-l border-gray-200 pl-6">
+    <div className="space-y-5 border-l border-zinc-200 pl-6">
       {blocks}
-      <footer className="mt-10 pt-6 border-t border-gray-200">
+      <footer className="mt-10 pt-6 border-t border-zinc-200">
         <div className="flex items-center gap-4">
           <img
             src={resolvedAuthorImage}
             alt={resolvedAuthorName}
-            className="h-12 w-12 rounded-full border border-gray-200 bg-white"
+            className="h-12 w-12 rounded-full border border-zinc-200 bg-zinc-50"
             loading="lazy"
           />
           <div className="min-w-0">
-            <div className="text-sm text-gray-500">Author</div>
-            <div className="font-merriweather text-base font-semibold text-gray-900 truncate">
+            <div className="text-sm text-zinc-500">Author</div>
+            <div className="font-merriweather text-base font-semibold text-zinc-900 truncate">
               {resolvedAuthorName}
             </div>
           </div>

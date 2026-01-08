@@ -234,3 +234,88 @@
     opacity: 0;
   }
 }
+
+@keyframes twinkle-ring-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes twinkle-ring-pulse {
+  0%,
+  100% {
+    opacity: 0.75;
+    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.28)) drop-shadow(0 0 12px rgba(255, 255, 255, 0.14));
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.45)) drop-shadow(0 0 18px rgba(255, 255, 255, 0.22));
+  }
+}
+
+/* Twinkly “eye” ring around the profile image */
+.twinkle-ring {
+  position: relative;
+  display: inline-block;
+  border-radius: 9999px;
+}
+
+.twinkle-ring::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  padding: 3px;
+  background:
+    conic-gradient(
+      from 0deg,
+      rgba(255, 255, 255, 0) 0deg,
+      rgba(255, 255, 255, 0.95) 28deg,
+      rgba(255, 255, 255, 0) 68deg,
+      rgba(255, 255, 255, 0) 180deg,
+      rgba(255, 255, 255, 0.7) 208deg,
+      rgba(255, 255, 255, 0) 248deg,
+      rgba(255, 255, 255, 0) 360deg
+    );
+  pointer-events: none;
+
+  /* Keep only the ring (mask out the center) */
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+
+  animation: twinkle-ring-rotate 3.2s linear infinite, twinkle-ring-pulse 1.9s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .twinkle-ring::before {
+    animation: none;
+  }
+}
+
+/* Vertical stardust divider used between article and sidebar */
+.stardust-divider {
+  position: relative;
+  width: 14px;
+  border-radius: 9999px;
+  opacity: 0.85;
+  background-image:
+    linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0)),
+    radial-gradient(1.2px 1.2px at 35% 8%, rgba(255, 255, 255, 0.95) 0, rgba(255, 255, 255, 0) 70%),
+    radial-gradient(1px 1px at 62% 14%, rgba(255, 255, 255, 0.8) 0, rgba(255, 255, 255, 0) 72%),
+    radial-gradient(1.4px 1.4px at 48% 22%, rgba(255, 255, 255, 0.9) 0, rgba(255, 255, 255, 0) 72%),
+    radial-gradient(1px 1px at 28% 31%, rgba(255, 255, 255, 0.75) 0, rgba(255, 255, 255, 0) 72%),
+    radial-gradient(1.3px 1.3px at 66% 39%, rgba(255, 255, 255, 0.9) 0, rgba(255, 255, 255, 0) 72%),
+    radial-gradient(1px 1px at 40% 47%, rgba(255, 255, 255, 0.75) 0, rgba(255, 255, 255, 0) 72%),
+    radial-gradient(1.4px 1.4px at 55% 58%, rgba(255, 255, 255, 0.95) 0, rgba(255, 255, 255, 0) 72%),
+    radial-gradient(1px 1px at 30% 66%, rgba(255, 255, 255, 0.7) 0, rgba(255, 255, 255, 0) 72%),
+    radial-gradient(1.2px 1.2px at 63% 74%, rgba(255, 255, 255, 0.85) 0, rgba(255, 255, 255, 0) 72%),
+    radial-gradient(1px 1px at 44% 82%, rgba(255, 255, 255, 0.75) 0, rgba(255, 255, 255, 0) 72%),
+    radial-gradient(1.3px 1.3px at 58% 92%, rgba(255, 255, 255, 0.9) 0, rgba(255, 255, 255, 0) 72%);
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.18));
+  mix-blend-mode: screen;
+  mask-image: linear-gradient(to bottom, transparent, black 12%, black 88%, transparent);
+}

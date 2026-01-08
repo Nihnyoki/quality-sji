@@ -413,7 +413,7 @@ const MainContainer: React.FC = () => {
                 <article className="font-poppins max-w-4xl">
                 <header className="mb-6">
                   <div className="mb-3">
-                    <span className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-600">
+                    <span className="inline-flex items-center rounded-full border border-zinc-300 bg-zinc-50/70 px-3 py-1 text-xs font-medium text-zinc-700">
                       {panelContent.type === 'quality'
                         ? 'Quality Philosophy'
                         : panelContent.type === 'video'
@@ -421,15 +421,15 @@ const MainContainer: React.FC = () => {
                           : 'Project'}
                     </span>
                   </div>
-                  <h2 className="font-merriweather text-2xl md:text-3xl font-semibold leading-snug text-gray-900">
+                  <h2 className="font-merriweather text-2xl md:text-3xl font-semibold leading-snug text-zinc-900">
                     {panelContent?.post.title}
                   </h2>
                   {panelContent?.post.subtitle && (
-                    <p className="mt-2 text-base text-gray-600 leading-relaxed">
+                    <p className="mt-2 text-base text-zinc-700 leading-relaxed">
                       {panelContent?.post.subtitle}
                     </p>
                   )}
-                  <div className="mt-3 text-xs tracking-wide text-gray-400">
+                  <div className="mt-3 text-xs tracking-wide text-zinc-500">
                     Published {panelContent?.post.published}
                   </div>
                 </header>

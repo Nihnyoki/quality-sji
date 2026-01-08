@@ -7,7 +7,7 @@ const SandileCV: React.FC = () => (
     <div className="mb-4">
       <span className="font-semibold">Centurion, Gauteng, South Africa</span><br />
       <span>Email: <a href="mailto:wifizi.gokhinki@gmail.com" className="text-blue-600 underline">wifizi.gokhinki@gmail.com</a></span><br />
-      <span>Mobile: 063 651 6307</span><br />
+      <span>Mobile: 067 932 3805</span><br />
       <span>GitHub: <a href="https://github.com/Nihnyoki" className="text-blue-600 underline">Nihnyoki</a></span><br />
       <span>YouTube: <a href="https://www.youtube.com/channel/UCR8DJ0lguiwKsDIRZ3v_fjw" className="text-blue-600 underline">Channel</a></span>
     </div>
