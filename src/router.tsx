@@ -1,5 +1,4 @@
 import {
-  createBrowserRouter,
   createRootRoute,
   createRoute,
   createRouter,
