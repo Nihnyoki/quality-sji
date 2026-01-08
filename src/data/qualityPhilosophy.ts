@@ -73,18 +73,4 @@ export const qualityPhilosophyPosts: BlogPost[] = [
     authorName: 'Sandile Mnqayi',
     authorImage: '/images/author-placeholder.svg'
   },
-  {
-    id: "automation-is-telemetry",
-    title: "Automation Is Telemetry",
-    subtitle: "Tests as signals, not scripts",
-    published: "2026-01-07",
-    content: [
-      "Automated tests are not just pass/fail checks — they are signals.",
-      "When designed correctly, automation becomes a telemetry pipeline that exposes functional correctness, performance trends, and release risk.",
-      "If automation cannot inform a decision, it is noise."
-    ],
-    image: '/images/automation-telemetry.jpeg', // Fixed path
-    authorName: 'Sandile Mnqayi',
-    authorImage: '/images/author-placeholder.svg'
-  },
 ];

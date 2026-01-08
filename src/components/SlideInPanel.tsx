@@ -1,5 +1,5 @@
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useEffect, useMemo, useRef } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 
 interface SlideInPanelProps {
   isOpen: boolean;
@@ -19,7 +19,95 @@ const panelVariants = {
   exit: { x: '-12%', opacity: 0.98 },
 };
 
+function getFocusableElements(root: HTMLElement) {
+  const selector = [
+    'a[href]',
+    'button:not([disabled])',
+    'textarea:not([disabled])',
+    'input:not([disabled])',
+    'select:not([disabled])',
+    '[tabindex]:not([tabindex="-1"])',
+  ].join(',');
+  return Array.from(root.querySelectorAll<HTMLElement>(selector)).filter(
+    (el) => !el.hasAttribute('disabled') && !el.getAttribute('aria-hidden')
+  );
+}
+
 const SlideInPanel: React.FC<SlideInPanelProps> = ({ isOpen, onClose, children }) => {
+  const reduceMotion = useReducedMotion();
+  const panelRef = useRef<HTMLElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const restoreFocusRef = useRef<HTMLElement | null>(null);
+
+  const panelTransition = useMemo(() => {
+    if (reduceMotion) return { duration: 0.01 };
+    return { type: 'spring', stiffness: 340, damping: 34 };
+  }, [reduceMotion]);
+
+  const backdropTransition = useMemo(() => {
+    if (reduceMotion) return { duration: 0.01 };
+    return { duration: 0.18, ease: 'easeOut' };
+  }, [reduceMotion]);
+
+  const effectivePanelVariants = useMemo(() => {
+    if (reduceMotion) {
+      return {
+        hidden: { x: 0, opacity: 1 },
+        visible: { x: 0, opacity: 1 },
+        exit: { x: 0, opacity: 1 },
+      };
+    }
+    return panelVariants;
+  }, [reduceMotion]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    restoreFocusRef.current = document.activeElement as HTMLElement | null;
+    const t = window.setTimeout(() => closeButtonRef.current?.focus(), 0);
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+        return;
+      }
+
+      if (e.key !== 'Tab') return;
+      const root = panelRef.current;
+      if (!root) return;
+
+      const focusables = getFocusableElements(root);
+      if (focusables.length === 0) return;
+
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+
+      if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      } else if (e.shiftKey && active === first) {
+        e.preventDefault();
+        last.focus();
+      }
+    };
+
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      window.clearTimeout(t);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [isOpen, onClose]);
+
+  useEffect(() => {
+    if (isOpen) return;
+    const el = restoreFocusRef.current;
+    if (el && typeof el.focus === 'function') {
+      el.focus();
+    }
+  }, [isOpen]);
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -29,40 +117,44 @@ const SlideInPanel: React.FC<SlideInPanelProps> = ({ isOpen, onClose, children }
           animate="visible"
           exit="exit"
           variants={backdropVariants}
-          transition={{ duration: 0.18, ease: 'easeOut' }}
+          transition={backdropTransition}
           onClick={onClose}
           role="presentation"
         >
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
 
           <motion.aside
-            className="absolute left-0 top-0 h-full bg-white border-r border-gray-200 shadow-2xl overflow-hidden"
+            className="absolute left-4 top-4 bottom-4 bg-transparent rounded-2xl shadow-2xl overflow-hidden"
             style={{ width: '80vw', maxWidth: '80vw', minWidth: '320px' }}
             initial="hidden"
             animate="visible"
             exit="exit"
-            variants={panelVariants}
-            transition={{ type: 'spring', stiffness: 340, damping: 34 }}
+            variants={effectivePanelVariants}
+            transition={panelTransition}
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
+            ref={(el) => {
+              panelRef.current = el;
+            }}
           >
-            <div className="h-full flex flex-col">
-              <div className="sticky top-0 z-10 bg-white/90 backdrop-blur border-b border-gray-200">
-                <div className="px-6 py-4 flex items-center justify-end">
-                  <button
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-gray-900"
-                    onClick={onClose}
-                    aria-label="Close panel"
-                    type="button"
-                  >
-                    <span className="text-2xl leading-none">&times;</span>
-                  </button>
-                </div>
-              </div>
+            <div className="relative h-full">
+              <button
+                ref={closeButtonRef}
+                className="absolute right-6 top-6 z-20 inline-flex h-10 w-10 items-center justify-center rounded-full bg-transparent text-white/90 ring-1 ring-white/25 hover:text-white hover:shadow-xl transition"
+                onClick={onClose}
+                aria-label="Close panel"
+                type="button"
+              >
+                <span className="text-2xl leading-none">&times;</span>
+              </button>
 
-              <div className="flex-1 overflow-y-auto px-6 py-6">
-                {children}
+              <div className="h-full overflow-y-auto px-6 pb-10 pt-20">
+                <div className="bg-white rounded-2xl">
+                  <div className="px-6 py-6">
+                    {children}
+                  </div>
+                </div>
               </div>
             </div>
           </motion.aside>

@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type * as THREE_NS from 'three';
+import { motion, useAnimationControls, useReducedMotion } from 'framer-motion';
 
 import { BlogPost, qualityPhilosophyPosts } from '../data/qualityPhilosophy';
 import { VideoPost, videoPosts } from '../data/videoPosts';
@@ -8,6 +9,7 @@ import { ProjectPost, projectPosts } from '../data/projectPosts';
 import SlideInPanel from './SlideInPanel';
 import { FaGithub } from 'react-icons/fa'
 import PostContent from './PostContent';
+import TypingText from './TypingText';
 const qualitySystemModel = '/images/quality-system.glb';
 const telemetryModel = '/images/telemetry.glb';
 
@@ -18,6 +20,27 @@ const MainContainer: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const [panelContent, setPanelContent] = useState<PanelContent>(null);
+  const reduceMotionUI = useReducedMotion();
+  const terminalAnim = useAnimationControls();
+  const terminalWrapRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (reduceMotionUI) return;
+
+    const el = terminalWrapRef.current;
+    if (!el) return;
+
+    // Start visually at the top of the viewport, then glide down to its natural layout position.
+    const rect = el.getBoundingClientRect();
+    const startY = -rect.top;
+
+    terminalAnim.set({ y: startY, opacity: 1 });
+    terminalAnim.start({
+      y: 0,
+      opacity: 1,
+      transition: { duration: 120, ease: [0.22, 1, 0.36, 1] },
+    });
+  }, [reduceMotionUI, terminalAnim]);
 
     useEffect(() => {
       const container = containerRef.current;
@@ -29,7 +52,10 @@ const MainContainer: React.FC = () => {
       const start = async () => {
         const THREE = await import('three');
         const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
+        const { CSS3DRenderer, CSS3DObject } = await import('three/examples/jsm/renderers/CSS3DRenderer.js');
         if (cancelled) return;
+
+        const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
 
         // Set up the scene, camera, and renderer
         const scene = new THREE.Scene();
@@ -45,10 +71,49 @@ const MainContainer: React.FC = () => {
           renderer.domElement.style.display = 'block';
           container.appendChild(renderer.domElement);
         }
-        renderer.setClearColor(0x87ceeb, 1);
+        // Space-like background
+        scene.background = new THREE.Color(0x04040a);
+        renderer.setClearColor(0x04040a, 1);
+
+        // Starfield (simple, lightweight Points cloud)
+        {
+          const starCount = 1400;
+          const positions = new Float32Array(starCount * 3);
+          for (let i = 0; i < starCount; i++) {
+            const i3 = i * 3;
+            // Distribute stars in a large box behind the content
+            positions[i3 + 0] = (Math.random() - 0.5) * 220;
+            positions[i3 + 1] = (Math.random() - 0.5) * 140;
+            positions[i3 + 2] = -Math.random() * 420;
+          }
+          const starGeo = new THREE.BufferGeometry();
+          starGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+          const starMat = new THREE.PointsMaterial({
+            color: 0xffffff,
+            size: 0.35,
+            sizeAttenuation: true,
+            transparent: true,
+            opacity: 0.9,
+            depthWrite: false,
+          });
+          const stars = new THREE.Points(starGeo, starMat);
+          (stars as any).renderOrder = -1;
+          scene.add(stars);
+        }
+
+        const cssRenderer = new CSS3DRenderer();
+        cssRenderer.setSize(container.clientWidth, container.clientHeight);
+        cssRenderer.domElement.style.position = 'absolute';
+        cssRenderer.domElement.style.top = '0';
+        cssRenderer.domElement.style.left = '0';
+        cssRenderer.domElement.style.width = '100%';
+        cssRenderer.domElement.style.height = '100%';
+        cssRenderer.domElement.style.pointerEvents = 'none';
+        cssRenderer.domElement.style.zIndex = '2';
+        container.appendChild(cssRenderer.domElement);
 
       // Prepare posts
-      const posts: Array<{ id: string; type: PostType; title: string; link: string; delay: number; model: string; }> = [
+      const posts: Array<{ id: string; type: PostType; title: string; link: string; delay: number; model?: string; youtubeId?: string; }> = [
         ...qualityPhilosophyPosts.map((post: BlogPost, i: number) => ({
           id: post.id,
           type: 'quality' as PostType,
@@ -63,7 +128,8 @@ const MainContainer: React.FC = () => {
           title: post.title,
           link: `/videos/${post.id}`,
           delay: Math.random() * 5,
-          model: i % 2 === 0 ? telemetryModel : qualitySystemModel,
+          youtubeId: post.youtubeId,
+          model: post.youtubeId ? undefined : (i % 2 === 0 ? telemetryModel : qualitySystemModel),
         })),
         ...projectPosts.map((post: ProjectPost, i: number) => ({
           id: post.id,
@@ -81,9 +147,60 @@ const MainContainer: React.FC = () => {
       const speedMultipliers = posts.map(() => [0.02, 0.03, 0.04][Math.floor(Math.random() * 3)]);
       const initialXs = posts.map(() => Math.random() * 30 - 15);
       const initialYs = posts.map(() => Math.random() * 16 - 8);
-      const titleColors = ['#FF6B6B', '#4ECDC4', '#FFD93D', '#1A535C', '#FF8C42', '#6B47DC', '#FF5EAE', '#00B8A9'];
 
       posts.forEach((post, index) => {
+        if (post.type === 'video' && post.youtubeId) {
+          const widthPx = 480;
+          const heightPx = 270;
+          const scale = 0.01;
+
+          const iframe = document.createElement('iframe');
+          iframe.width = String(widthPx);
+          iframe.height = String(heightPx);
+          iframe.style.border = '0';
+          iframe.style.borderRadius = '14px';
+          iframe.style.background = 'transparent';
+          iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+          iframe.setAttribute('allowfullscreen', 'true');
+          iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+          iframe.loading = 'eager';
+
+          const id = post.youtubeId;
+          const origin = encodeURIComponent(window.location.origin);
+          iframe.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=1&controls=0&rel=0&playsinline=1&loop=1&playlist=${id}&enablejsapi=1&origin=${origin}`;
+
+          // Some browsers ignore autoplay params on first paint; nudge the player via JS API.
+          iframe.addEventListener('load', () => {
+            const targetWindow = iframe.contentWindow;
+            if (!targetWindow) return;
+
+            const send = (func: string, args: any = '') => {
+              targetWindow.postMessage(JSON.stringify({ event: 'command', func, args }), '*');
+            };
+
+            send('mute');
+            send('playVideo');
+            window.setTimeout(() => send('playVideo'), 500);
+            window.setTimeout(() => send('playVideo'), 1500);
+          });
+
+          const cssObject = new CSS3DObject(iframe);
+          (cssObject as any).position.set(0, 0, 0.01);
+          (cssObject as any).scale.set(scale, scale, scale);
+
+          const planeW = widthPx * scale;
+          const planeH = heightPx * scale;
+          const planeGeo = new THREE.PlaneGeometry(planeW, planeH);
+          const planeMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
+          const planeMesh = new THREE.Mesh(planeGeo, planeMat) as unknown as THREE_NS.Object3D;
+          (planeMesh as any).position.set(initialXs[index], initialYs[index], -20 - post.delay * 10);
+          (planeMesh as any).userData = { link: post.link, postType: post.type, postId: post.id, youtubeId: post.youtubeId };
+          (planeMesh as any).add(cssObject);
+          (scene as any).add(planeMesh);
+          (objects as any).push(planeMesh);
+          return;
+        }
+
         if (post.model) {
           loader.load(
             post.model,
@@ -96,25 +213,6 @@ const MainContainer: React.FC = () => {
               const scale = maxDim > 0 ? 4 / maxDim : 1;
               (model as any).scale.setScalar(scale);
               (model as any).position.set(initialXs[index], initialYs[index], -20 - post.delay * 10);
-              const canvas = document.createElement('canvas');
-              const ctx = canvas.getContext('2d');
-              if (ctx) {
-                canvas.width = 512;
-                canvas.height = 128;
-                ctx.fillStyle = 'transparent';
-                ctx.font = '30px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillStyle = titleColors[index % titleColors.length];
-                ctx.fillText(post.title, canvas.width / 2, canvas.height / 2 + 10);
-              }
-              const texture = new THREE.CanvasTexture(canvas);
-              const titleMaterial = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
-              const titlePlane = new THREE.Mesh(new THREE.PlaneGeometry(4, 1), titleMaterial) as unknown as THREE_NS.Object3D;
-              (titlePlane as any).position.set(0, 0.7, 0);
-              (titlePlane as any).rotation.x = 0;
-              (titlePlane as any).rotation.y = 0;
-              (titlePlane as any).rotation.z = 0;
-              (model as any).add(titlePlane);
               (model as any).userData = { link: post.link, postType: post.type, postId: post.id };
               (scene as any).add(model);
               (objects as any).push(model);
@@ -129,22 +227,6 @@ const MainContainer: React.FC = () => {
           const material = new THREE.MeshStandardMaterial({ color: 0x0077ff });
           const mesh = new THREE.Mesh(geometry, material) as unknown as THREE_NS.Object3D;
           (mesh as any).position.set(initialXs[index], initialYs[index], -20 - post.delay * 10);
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            canvas.width = 512;
-            canvas.height = 128;
-            ctx.fillStyle = 'transparent';
-            ctx.font = '30px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillStyle = titleColors[index % titleColors.length];
-            ctx.fillText(post.title, canvas.width / 2, canvas.height / 2 + 10);
-          }
-          const texture = new THREE.CanvasTexture(canvas);
-          const titleMaterial = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
-          const titlePlane = new THREE.Mesh(new THREE.PlaneGeometry(4, 1), titleMaterial) as unknown as THREE_NS.Object3D;
-          (titlePlane as any).position.set(0, 2.5, 0);
-          (mesh as any).add(titlePlane);
           (mesh as any).userData = { link: post.link, postType: post.type, postId: post.id };
           (scene as any).add(mesh);
           (objects as any).push(mesh);
@@ -162,25 +244,57 @@ const MainContainer: React.FC = () => {
       let rafId = 0;
       const animate = () => {
         rafId = requestAnimationFrame(animate);
-        (objects as any).forEach((obj: any, index: number) => {
-          if (obj.position) {
-            obj.position.z += speedMultipliers[index];
-            if (obj.position.z > 0) {
-              obj.position.z = -20 - posts[index].delay * 10;
-              obj.position.x = initialXs[index];
-              obj.position.y = initialYs[index];
-              speedMultipliers[index] = [0.02, 0.03, 0.04][Math.floor(Math.random() * 3)];
+        if (!reduceMotion) {
+          (objects as any).forEach((obj: any, index: number) => {
+            if (obj.position) {
+              obj.position.z += speedMultipliers[index];
+              if (obj.position.z > 0) {
+                obj.position.z = -20 - posts[index].delay * 10;
+                obj.position.x = initialXs[index];
+                obj.position.y = initialYs[index];
+                speedMultipliers[index] = [0.02, 0.03, 0.04][Math.floor(Math.random() * 3)];
+              }
             }
-          }
-        });
+          });
+        }
         renderer.render(scene, camera);
+        cssRenderer.render(scene, camera);
       };
       animate();
 
-      // Click handler (attach to canvas)
-      const handleClick = (event: Event) => {
+      const findPostRoot = (obj: any) => {
+        let current = obj;
+        let data = current?.userData || {};
+        while (current && (!data.postType || !data.postId) && current.parent) {
+          current = current.parent;
+          data = current?.userData || {};
+        }
+        return current && data.postType && data.postId ? current : null;
+      };
+
+      let hovered: any = null;
+      const setHovered = (next: any) => {
+        if (hovered === next) return;
+        if (hovered) {
+          const prevScale = hovered.userData?.__hoverScaleBackup;
+          if (prevScale && hovered.scale?.set) hovered.scale.set(prevScale.x, prevScale.y, prevScale.z);
+          if (hovered.userData) delete hovered.userData.__hoverScaleBackup;
+        }
+        hovered = next;
+        if (hovered) {
+          if (hovered.scale?.clone) {
+            hovered.userData = hovered.userData || {};
+            hovered.userData.__hoverScaleBackup = hovered.scale.clone();
+            hovered.scale.multiplyScalar?.(1.05);
+          }
+          (renderer.domElement as HTMLCanvasElement).style.cursor = 'pointer';
+        } else {
+          (renderer.domElement as HTMLCanvasElement).style.cursor = 'default';
+        }
+      };
+
+      const handlePointerMove = (event: Event) => {
         const mouseEvent = event as MouseEvent;
-        console.log('Canvas click event from handleClick');
         const canvas = renderer.domElement as HTMLCanvasElement;
         const rect = canvas.getBoundingClientRect();
         const mouse = new THREE.Vector2(
@@ -190,17 +304,31 @@ const MainContainer: React.FC = () => {
         const raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3());
         raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects(objects as any, true) as Array<any>;
-        console.log('Intersects:', intersects);
         if (intersects.length > 0) {
-          let obj = intersects[0].object as any;
-          let userData = (obj as any).userData || {};
-          // Traverse up the parent chain to find userData with postType and postId
-          while (obj && (!userData.postType || !userData.postId) && obj.parent) {
-            obj = obj.parent;
-            userData = (obj as any).userData || {};
-          }
+          const root = findPostRoot(intersects[0].object);
+          setHovered(root);
+        } else {
+          setHovered(null);
+        }
+      };
+      renderer.domElement.addEventListener('mousemove', handlePointerMove);
+
+      // Click handler (attach to canvas)
+      const handleClick = (event: Event) => {
+        const mouseEvent = event as MouseEvent;
+        const canvas = renderer.domElement as HTMLCanvasElement;
+        const rect = canvas.getBoundingClientRect();
+        const mouse = new THREE.Vector2(
+          ((mouseEvent.clientX - rect.left) / rect.width) * 2 - 1,
+          -((mouseEvent.clientY - rect.top) / rect.height) * 2 + 1
+        );
+        const raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3());
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(objects as any, true) as Array<any>;
+        if (intersects.length > 0) {
+          const root = findPostRoot(intersects[0].object as any);
+          const userData = (root as any)?.userData || {};
           const { postType, postId } = userData || {};
-          console.log('userData:', userData, 'postType:', postType, 'postId:', postId);
           let found: BlogPost | VideoPost | ProjectPost | undefined;
           if (postType === 'quality') {
             found = qualityPhilosophyPosts.find((p: BlogPost) => p.id === postId);
@@ -209,7 +337,6 @@ const MainContainer: React.FC = () => {
           } else if (postType === 'project') {
             found = projectPosts.find((p: ProjectPost) => p.id === postId);
           }
-          console.log('found:', found);
           if (found) {
             setPanelContent({ type: postType, post: found });
             setPanelOpen(true);
@@ -223,6 +350,7 @@ const MainContainer: React.FC = () => {
         camera.aspect = container.clientWidth / container.clientHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(container.clientWidth, container.clientHeight);
+        cssRenderer.setSize(container.clientWidth, container.clientHeight);
       };
       window.addEventListener('resize', handleResize);
 
@@ -230,9 +358,12 @@ const MainContainer: React.FC = () => {
         cancelAnimationFrame(rafId);
         window.removeEventListener('resize', handleResize);
         renderer.domElement.removeEventListener('click', handleClick);
+        renderer.domElement.removeEventListener('mousemove', handlePointerMove);
+        setHovered(null);
         if (renderer.domElement instanceof HTMLCanvasElement) {
           container.removeChild(renderer.domElement);
         }
+        container.removeChild(cssRenderer.domElement);
         renderer.dispose();
       };
     };
@@ -255,6 +386,9 @@ const MainContainer: React.FC = () => {
 
     return (
       <div className="min-h-screen bg-gray-100 relative">
+        {/* Full-viewport 3D background (visible behind content) */}
+        <div ref={containerRef} className="fixed inset-0 z-0" />
+
         {/* Navigation Bar */}
         <nav className="bg-white shadow-md">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -268,16 +402,25 @@ const MainContainer: React.FC = () => {
         </nav>
 
         {/* Hero Section with 3D Objects */}
-        <header className="relative" style={{ height: '65vh' }}>
-          <div ref={containerRef} className="absolute top-0 left-0 w-full h-full z-0" />
+        <header className="relative pointer-events-none" style={{ height: '65vh' }}>
         </header>
 
         {/* Content Section */}
-        <main className="py-12">
-          <SlideInPanel isOpen={panelOpen} onClose={() => setPanelOpen(false)}>
-            {panelContent && (
-              <article className="font-poppins max-w-4xl">
+        <main className="relative z-10 py-12 bg-transparent pointer-events-none">
+          <div className="pointer-events-auto">
+            <SlideInPanel isOpen={panelOpen} onClose={() => setPanelOpen(false)}>
+              {panelContent && (
+                <article className="font-poppins max-w-4xl">
                 <header className="mb-6">
+                  <div className="mb-3">
+                    <span className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-600">
+                      {panelContent.type === 'quality'
+                        ? 'Quality Philosophy'
+                        : panelContent.type === 'video'
+                          ? 'Video'
+                          : 'Project'}
+                    </span>
+                  </div>
                   <h2 className="font-merriweather text-2xl md:text-3xl font-semibold leading-snug text-gray-900">
                     {panelContent?.post.title}
                   </h2>
@@ -296,40 +439,167 @@ const MainContainer: React.FC = () => {
                   authorName={panelContent.post.authorName}
                   authorImage={panelContent.post.authorImage}
                 />
-              </article>
-            )}
-          </SlideInPanel>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-white shadow-md rounded-lg p-6">
-                <h2 className="text-2xl font-semibold mb-4">Sandile Mnqayi</h2>
-                <p className="text-gray-600 mb-2">Test Automation Architect, QA Team Lead, and BDD advocate. Click below to view my profile.</p>
-                <Link to="/cv" className="inline-block mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-pink-300 transition">Well versed in...</Link>
-            </div>
-<div className="bg-white shadow-md rounded-lg p-6">
-  <h2 className="text-2xl font-semibold mb-2">GitHub</h2>
-  <p className="text-gray-600 mb-4 p-1">
-
-    <FaGithub size={24} />  </p>
-
-    <a href="https://github.com/Nihnyoki/" target="_blank" rel="noreferrer" className="inline-block mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-pink-300 transition">Coffe & Code</a>
-
-</div>
-
-            <div className="bg-white shadow-md rounded-lg p-6">
-              <h2 className="text-2xl font-semibold mb-4">Videos</h2>
-              <p className="text-gray-600">Videos on quality in the software industry, my personal insights, and more...</p>
-                <a href="https://www.youtube.com/@NeatNetSpring" target="_blank" rel="noreferrer" className="inline-block mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-pink-300 transition">Put a face to the name</a>
-            </div>
-            <div className="bg-white shadow-md rounded-lg p-6">
-              <h2 className="text-2xl font-semibold mb-4">Blogs</h2>
-              <p className="text-gray-600">Some popular, some not so popular however very intriguing to an authentic audience.</p>
-                <Link to="/quality-philosophy" className="inline-block mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-pink-300 transition">I say this...</Link>
-            </div>
+                </article>
+              )}
+            </SlideInPanel>
           </div>
+
+          <motion.div
+            ref={terminalWrapRef}
+            className="mt-[85vh] px-4 sm:px-6 lg:px-8 pointer-events-none"
+            initial={false}
+            animate={reduceMotionUI ? { opacity: 1, y: 0 } : terminalAnim}
+          >
+            <div className="flex justify-end">
+              <div className="w-[min(28rem,calc(100vw-3rem))] h-[23rem] max-h-[calc(100vh-6rem)]">
+                {(() => {
+              const charIntervalMs = 18;
+              const gapMs = 180;
+              const t1 = 'Title: Sandile Mnqayi.';
+              const d1 = 'Test Automation Architect, QA Team Lead, and BDD advocate.';
+              const t2 = 'Title: GitHub.';
+              const d2 = 'Coffe & Code — projects, experiments, and tooling.';
+              const t3 = 'Title: Videos.';
+              const d3 = 'Quality in software: practical insights, patterns, and demos.';
+              const t4 = 'Title: Blogs.';
+              const d4 = 'Field notes on quality, delivery, and systems thinking.';
+
+              const s1 = 120;
+              const s2 = s1 + t1.length * charIntervalMs + gapMs;
+              const s3 = s2 + d1.length * charIntervalMs + gapMs;
+              const s4 = s3 + t2.length * charIntervalMs + gapMs;
+              const s5 = s4 + d2.length * charIntervalMs + gapMs;
+              const s6 = s5 + t3.length * charIntervalMs + gapMs;
+              const s7 = s6 + d3.length * charIntervalMs + gapMs;
+              const s8 = s7 + t4.length * charIntervalMs + gapMs;
+
+              const rowBase =
+                'pointer-events-auto block flex-1 px-5 py-3 font-mono font-light transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300/30 hover:bg-slate-900/65 overflow-hidden';
+
+              return (
+                <div className="h-full rounded-none border border-slate-700/60 bg-slate-900/55 backdrop-blur shadow-sm overflow-hidden flex flex-col">
+                  <div className="pointer-events-none select-none flex items-center gap-2 bg-slate-900/70 px-3 py-2 shrink-0">
+                    <span className="h-3 w-3 rounded-full bg-red-500/80" aria-hidden="true" />
+                    <span className="h-3 w-3 rounded-full bg-yellow-400/80" aria-hidden="true" />
+                    <span className="h-3 w-3 rounded-full bg-emerald-500/80" aria-hidden="true" />
+                  </div>
+
+                  <div className="flex-1 flex flex-col">
+                  <Link
+                    to="/cv"
+                    className={rowBase}
+                    aria-label="Open CV"
+                  >
+                    <div className="h-full flex flex-col justify-center text-sm text-slate-300 space-y-1 leading-snug">
+                      <div>
+                        <TypingText
+                          text={t1}
+                          startDelayMs={s1}
+                          charIntervalMs={charIntervalMs}
+                          showCursor={false}
+                        />
+                      </div>
+                      <div>
+                        <TypingText
+                          text={d1}
+                          startDelayMs={s2}
+                          charIntervalMs={charIntervalMs}
+                          showCursor={false}
+                        />
+                      </div>
+                    </div>
+                  </Link>
+
+                  <a
+                    href="https://github.com/Nihnyoki/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className={rowBase}
+                    aria-label="Open GitHub profile"
+                  >
+                    <div className="h-full flex flex-col justify-center text-sm text-slate-300 space-y-1 leading-snug">
+                      <div>
+                        <TypingText
+                          text={t2}
+                          startDelayMs={s3}
+                          charIntervalMs={charIntervalMs}
+                          showCursor={false}
+                        />
+                      </div>
+                      <div>
+                        <TypingText
+                          text={d2}
+                          startDelayMs={s4}
+                          charIntervalMs={charIntervalMs}
+                          showCursor={false}
+                        />
+                      </div>
+                    </div>
+                  </a>
+
+                  <a
+                    href="https://www.youtube.com/@NeatNetSpring"
+                    target="_blank"
+                    rel="noreferrer"
+                    className={rowBase}
+                    aria-label="Open YouTube channel"
+                  >
+                    <div className="h-full flex flex-col justify-center text-sm text-slate-300 space-y-1 leading-snug">
+                      <div>
+                        <TypingText
+                          text={t3}
+                          startDelayMs={s5}
+                          charIntervalMs={charIntervalMs}
+                          showCursor={false}
+                        />
+                      </div>
+                      <div>
+                        <TypingText
+                          text={d3}
+                          startDelayMs={s6}
+                          charIntervalMs={charIntervalMs}
+                          showCursor={false}
+                        />
+                      </div>
+                    </div>
+                  </a>
+
+                  <Link
+                    to="/quality-philosophy"
+                    className={rowBase}
+                    aria-label="Open Blogs"
+                  >
+                    <div className="h-full flex flex-col justify-center text-sm text-slate-300 space-y-1 leading-snug">
+                      <div>
+                        <TypingText
+                          text={t4}
+                          startDelayMs={s7}
+                          charIntervalMs={charIntervalMs}
+                          showCursor={false}
+                        />
+                      </div>
+                      <div>
+                        <TypingText
+                          text={d4}
+                          startDelayMs={s8}
+                          charIntervalMs={charIntervalMs}
+                          showCursor
+                          persistCursor
+                        />
+                      </div>
+                    </div>
+                  </Link>
+                  </div>
+                </div>
+              );
+                })()}
+              </div>
+            </div>
+          </motion.div>
         </main>
 
         {/* Footer */}
-        <footer className="bg-gray-800 text-white py-6">
+        <footer className="bg-slate-900 text-gray-100 py-8 border-t border-slate-800">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <p>&copy; 2026 Quality SJI. All rights reserved.</p>
             </div>
