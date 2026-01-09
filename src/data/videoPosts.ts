@@ -13,13 +13,13 @@ export interface VideoPost {
 export const videoPosts: VideoPost[] = [
   {
     id: "video-2",
-    title: "Telemetry in Test Automation",
-    subtitle: "Making your tests talk",
+    title: "Partial Dynamic Test Inputs",
+    subtitle: "Explorative Tests",
     published: "2026-01-08",
     youtubeId: 'ukwRYUE3cMk',
     content: [
-      "How to use telemetry to get more value from your automated tests.",
-      "Includes real-world examples and dashboards."
+      "Keep critical inputs stable, but allow non-critical inputs to vary dynamically.",
+      "Some of the most impactful defects appear during exploratory testing — often when people interact with the system in unexpected ways."
     ],
     image: '/images/quality-system.jpeg',
     authorName: 'Sandile Mnqayi',

@@ -13,6 +13,36 @@ import TypingText from './TypingText';
 const qualitySystemModel = '/images/quality-system.glb';
 const telemetryModel = '/images/telemetry.glb';
 
+function extractYouTubeIdFromText(text: string): string | undefined {
+  const candidates = [
+    /(?:youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtu\.be\/)([A-Za-z0-9_-]{11})/,
+    /youtube\.com\/shorts\/([A-Za-z0-9_-]{11})/,
+  ];
+
+  for (const re of candidates) {
+    const m = text.match(re);
+    if (m?.[1]) return m[1];
+  }
+  return undefined;
+}
+
+function getYouTubeIdFromPost(post: unknown): string | undefined {
+  if (post && typeof post === 'object') {
+    const maybe = post as { youtubeId?: unknown; content?: unknown };
+    if (typeof maybe.youtubeId === 'string' && maybe.youtubeId.trim()) {
+      return maybe.youtubeId.trim();
+    }
+    if (Array.isArray(maybe.content)) {
+      for (const line of maybe.content) {
+        if (typeof line !== 'string') continue;
+        const id = extractYouTubeIdFromText(line);
+        if (id) return id;
+      }
+    }
+  }
+  return undefined;
+}
+
 type PostType = 'quality' | 'video' | 'project';
 type PanelContent = { type: PostType; post: BlogPost | VideoPost | ProjectPost } | null;
 
@@ -411,6 +441,34 @@ const MainContainer: React.FC = () => {
             <SlideInPanel isOpen={panelOpen} onClose={() => setPanelOpen(false)}>
               {panelContent && (
                 <article className="font-poppins max-w-4xl">
+                {(() => {
+                  const youtubeId = getYouTubeIdFromPost(panelContent.post);
+                  if (!youtubeId) return null;
+
+                  return (
+                    <section
+                      className="mb-6 overflow-hidden rounded-2xl"
+                      aria-label="Video"
+                    >
+                      <div className="px-4 pt-4">
+                        <div className="text-xs font-medium tracking-wide text-zinc-600">Video</div>
+                      </div>
+                      <div className="p-4 pt-3">
+                        <div className="relative w-full overflow-hidden rounded-xl bg-black aspect-video">
+                          <iframe
+                            className="absolute inset-0 h-full w-full"
+                            src={`https://www.youtube-nocookie.com/embed/${youtubeId}?rel=0&modestbranding=1&playsinline=1`}
+                            title="YouTube video player"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowFullScreen
+                            referrerPolicy="strict-origin-when-cross-origin"
+                            loading="lazy"
+                          />
+                        </div>
+                      </div>
+                    </section>
+                  );
+                })()}
                 <header className="mb-6">
                   <div className="mb-3">
                     <span className="inline-flex items-center rounded-full border border-zinc-300 bg-zinc-50/70 px-3 py-1 text-xs font-medium text-zinc-700">
