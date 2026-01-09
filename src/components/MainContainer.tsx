@@ -57,6 +57,11 @@ const MainContainer: React.FC = () => {
   const terminalWrapRef = useRef<HTMLDivElement>(null);
   const [activeInfoCard, setActiveInfoCard] = useState<number | null>(null);
 
+  const openPost = (type: PostType, post: BlogPost | VideoPost | ProjectPost) => {
+    setPanelContent({ type, post });
+    setPanelOpen(true);
+  };
+
   useLayoutEffect(() => {
     if (reduceMotionUI) {
       terminalAnim.set({ y: 0, opacity: 1 });
@@ -447,12 +452,20 @@ const MainContainer: React.FC = () => {
           </div>
         </nav>
 
-        {/* Hero Section with 3D Objects */}
-        <header className="relative pointer-events-none" style={{ height: '65vh' }}>
+        {/* Hero Section */}
+        <header className="relative z-20 pointer-events-none" style={{ height: '65vh' }}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
+            <h1 className="font-merriweather text-4xl md:text-5xl font-semibold tracking-tight text-white drop-shadow">
+              Sandile Mnqayi
+            </h1>
+            <p className="mt-2 max-w-2xl text-base md:text-lg text-slate-200">
+              Quality SJI — systems thinking in quality, delivery, and engineering.
+            </p>
+          </div>
         </header>
 
         {/* Content Section */}
-        <main className="relative z-10 py-12 bg-transparent pointer-events-none">
+        <main className="relative z-10 bg-transparent pointer-events-none">
           <div className="pointer-events-auto">
             <SlideInPanel isOpen={panelOpen} onClose={() => setPanelOpen(false)}>
               {panelContent && (
@@ -525,63 +538,122 @@ const MainContainer: React.FC = () => {
             </SlideInPanel>
           </div>
 
-          <motion.div
-            ref={terminalWrapRef}
-            className="mt-[85vh] px-4 sm:px-6 lg:px-8 pointer-events-none"
-            initial={{ opacity: 0, y: 0 }}
-            animate={terminalAnim}
-          >
+          {/* Bottom dock: Posts + Compliance cards (static), Terminal (falls) */}
+          <div className="fixed bottom-8 left-0 right-0 z-20 px-4 sm:px-6 lg:px-8 pointer-events-auto">
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-              <div className="order-2 md:order-1 pointer-events-auto">
-                <div className="relative [perspective:1200px] flex flex-row-reverse items-end justify-end overflow-visible">
-                  {([
-                    { title: 'About', to: '/about', description: 'What this site is about.' },
-                    { title: 'Privacy Policy', to: '/privacy-policy', description: 'How data is handled.' },
-                    { title: 'Contact', to: '/contact', description: 'Get in touch.' },
-                  ] as const).map((card, i) => {
-                    const isActive = activeInfoCard === i;
-                    const zIndex = isActive ? 50 : 20 - i;
-                    const baseZ = -i * 80;
-                    const rotateY = 16 - i * 2;
-                    const rotateZ = 2 - i * 0.6;
-
-                    return (
-                      <div
-                        key={card.to}
-                        className={cn('relative', i === 0 ? '' : '-mr-16')}
-                        style={{ zIndex }}
-                        onMouseEnter={() => setActiveInfoCard(i)}
-                        onMouseLeave={() => setActiveInfoCard(null)}
-                      >
-                        <Link
-                          to={card.to}
-                          className={cn(
-                            'block w-[min(23rem,calc(100vw-3rem))] rounded-none border border-slate-700/60 bg-slate-900/35 backdrop-blur',
-                            'px-5 py-4 shadow-lg transition-transform duration-200',
-                            'focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300/30'
-                          )}
-                          style={{
-                            transform: isActive
-                              ? 'translate3d(0px, -6px, 0px) rotateY(8deg) rotateZ(0deg)'
-                              : `translate3d(0px, 0px, ${baseZ}px) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`,
-                            transformStyle: 'preserve-3d',
-                          }}
-                          onFocus={() => setActiveInfoCard(i)}
-                          onBlur={() => setActiveInfoCard(null)}
-                          aria-label={card.title}
-                        >
-                          <div className="font-merriweather text-base font-semibold text-slate-100">
-                            {card.title}
-                          </div>
-                          <div className="mt-1 text-sm text-slate-300">{card.description}</div>
-                        </Link>
+              <div className="order-2 md:order-1 w-full">
+                <section
+                  aria-label="Posts"
+                  className="w-full rounded-none border border-slate-700/60 bg-slate-900/35 backdrop-blur shadow-sm"
+                >
+                  <div className="px-5 py-4">
+                    <div className="font-merriweather text-base font-semibold text-slate-100">Posts</div>
+                    <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <div className="text-xs font-medium tracking-wide text-slate-300">Quality</div>
+                        <div className="mt-2 max-h-36 overflow-auto">
+                          {qualityPhilosophyPosts.map((post) => (
+                            <button
+                              key={post.id}
+                              type="button"
+                              className="block w-full text-left text-sm text-slate-200/90 hover:text-white py-1"
+                              onClick={() => openPost('quality', post)}
+                            >
+                              {post.title}
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    );
-                  })}
+                      <div>
+                        <div className="text-xs font-medium tracking-wide text-slate-300">Videos</div>
+                        <div className="mt-2 max-h-36 overflow-auto">
+                          {videoPosts.map((post) => (
+                            <button
+                              key={post.id}
+                              type="button"
+                              className="block w-full text-left text-sm text-slate-200/90 hover:text-white py-1"
+                              onClick={() => openPost('video', post)}
+                            >
+                              {post.title}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-xs font-medium tracking-wide text-slate-300">Projects</div>
+                        <div className="mt-2 max-h-36 overflow-auto">
+                          {projectPosts.map((post) => (
+                            <button
+                              key={post.id}
+                              type="button"
+                              className="block w-full text-left text-sm text-slate-200/90 hover:text-white py-1"
+                              onClick={() => openPost('project', post)}
+                            >
+                              {post.title}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <div className="mt-6">
+                  <div className="relative [perspective:1200px] flex flex-row-reverse items-end justify-end overflow-visible">
+                    {([
+                      { title: 'About', to: '/about', description: 'What this site is about.' },
+                      { title: 'Privacy Policy', to: '/privacy-policy', description: 'How data is handled.' },
+                      { title: 'Contact', to: '/contact', description: 'Get in touch.' },
+                    ] as const).map((card, i) => {
+                      const isActive = activeInfoCard === i;
+                      const zIndex = isActive ? 50 : 20 - i;
+                      const baseZ = -i * 80;
+                      const rotateY = 16 - i * 2;
+                      const rotateZ = 2 - i * 0.6;
+
+                      return (
+                        <div
+                          key={card.to}
+                          className={cn('relative', i === 0 ? '' : '-mr-16')}
+                          style={{ zIndex }}
+                          onMouseEnter={() => setActiveInfoCard(i)}
+                          onMouseLeave={() => setActiveInfoCard(null)}
+                        >
+                          <Link
+                            to={card.to}
+                            className={cn(
+                              'block w-[min(23rem,calc(100vw-3rem))] rounded-none border border-slate-700/60 bg-slate-900/35 backdrop-blur',
+                              'px-5 py-4 shadow-lg transition-transform duration-200',
+                              'focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300/30'
+                            )}
+                            style={{
+                              transform: isActive
+                                ? 'translate3d(0px, -6px, 0px) rotateY(8deg) rotateZ(0deg)'
+                                : `translate3d(0px, 0px, ${baseZ}px) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`,
+                              transformStyle: 'preserve-3d',
+                            }}
+                            onFocus={() => setActiveInfoCard(i)}
+                            onBlur={() => setActiveInfoCard(null)}
+                            aria-label={card.title}
+                          >
+                            <div className="font-merriweather text-base font-semibold text-slate-100">
+                              {card.title}
+                            </div>
+                            <div className="mt-1 text-sm text-slate-300">{card.description}</div>
+                          </Link>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
 
-              <div className="order-1 md:order-2 w-[min(28rem,calc(100vw-3rem))] h-[23rem] max-h-[calc(100vh-6rem)]">
+              <motion.div
+                ref={terminalWrapRef}
+                className="order-1 md:order-2 pointer-events-none w-[min(28rem,calc(100vw-3rem))] h-[23rem] max-h-[calc(100vh-6rem)]"
+                initial={{ opacity: 0, y: 0 }}
+                animate={terminalAnim}
+              >
                 {(() => {
               const charIntervalMs = 32;
               const gapMs = 180;
@@ -723,9 +795,9 @@ const MainContainer: React.FC = () => {
                 </div>
               );
                 })()}
-              </div>
+              </motion.div>
             </div>
-          </motion.div>
+          </div>
         </main>
 
         {/* Footer */}
