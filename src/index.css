@@ -220,6 +220,47 @@
   pointer-events: none;
 }
 
+/* White-noise (grain) overlay */
+@keyframes white-noise-shift {
+  0% {
+    background-position: 0 0;
+  }
+  10% {
+    background-position: -12px 8px;
+  }
+  20% {
+    background-position: 18px -14px;
+  }
+  30% {
+    background-position: -22px -6px;
+  }
+  40% {
+    background-position: 6px 20px;
+  }
+  50% {
+    background-position: 26px 2px;
+  }
+  60% {
+    background-position: -8px -22px;
+  }
+  70% {
+    background-position: -28px 16px;
+  }
+  80% {
+    background-position: 14px -28px;
+  }
+  90% {
+    background-position: 30px 12px;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+.white-noise-overlay {
+  animation: white-noise-shift 0.35s steps(1, end) infinite;
+}
+
 /* Blink animation */
 @keyframes blink {
 

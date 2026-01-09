@@ -6,6 +6,8 @@ import { RouterProvider } from '@tanstack/react-router'
 import { TelemetryProvider } from './lib/TelemetryContext'
 import { router } from './router'
 
+import WhiteNoiseOverlay from './components/WhiteNoiseOverlay'
+
 import './index.css'
 import 'leaflet/dist/leaflet.css'
 
@@ -22,6 +24,7 @@ if (!rootElement.innerHTML) {
     <StrictMode>
       <TelemetryProvider>
         <RouterProvider router={router} />
+        <WhiteNoiseOverlay opacity={0.09} />
       </TelemetryProvider>
     </StrictMode>,
   )
