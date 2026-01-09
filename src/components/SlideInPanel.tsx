@@ -124,8 +124,7 @@ const SlideInPanel: React.FC<SlideInPanelProps> = ({ isOpen, onClose, children }
           <div className="absolute inset-0 bg-black/70 backdrop-blur-md" />
 
           <motion.aside
-            className="absolute left-4 top-4 bottom-4 rounded-2xl border border-zinc-300/80 bg-zinc-200/70 backdrop-blur-xl shadow-2xl overflow-hidden"
-            style={{ width: '80vw', maxWidth: '80vw', minWidth: '320px' }}
+            className="absolute inset-0 sm:left-4 sm:top-4 sm:bottom-4 sm:inset-x-auto sm:rounded-2xl border border-zinc-300/80 bg-zinc-200/70 backdrop-blur-xl shadow-2xl overflow-hidden w-full sm:w-[80vw] sm:max-w-[80vw] sm:min-w-[320px]"
             initial="hidden"
             animate="visible"
             exit="exit"
@@ -141,7 +140,7 @@ const SlideInPanel: React.FC<SlideInPanelProps> = ({ isOpen, onClose, children }
             <div className="relative h-full">
               <button
                 ref={closeButtonRef}
-                className="absolute right-6 top-6 z-20 inline-flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100/70 text-zinc-900 ring-1 ring-zinc-300/80 hover:bg-zinc-50/90 transition"
+                className="absolute right-4 top-4 sm:right-6 sm:top-6 z-20 inline-flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100/70 text-zinc-900 ring-1 ring-zinc-300/80 hover:bg-zinc-50/90 transition"
                 onClick={onClose}
                 aria-label="Close panel"
                 type="button"
@@ -149,7 +148,7 @@ const SlideInPanel: React.FC<SlideInPanelProps> = ({ isOpen, onClose, children }
                 <span className="text-2xl leading-none">&times;</span>
               </button>
 
-              <div className="h-full overflow-y-auto px-6 pb-10 pt-20">
+              <div className="h-full overflow-y-auto px-4 sm:px-6 pb-10 pt-16 sm:pt-20">
                 <div className="relative rounded-2xl border border-zinc-200/70 bg-zinc-50/25 backdrop-blur-md">
                   <div className="px-6 py-6 text-zinc-900">
                     <div className="flex flex-col lg:flex-row gap-8 items-stretch">

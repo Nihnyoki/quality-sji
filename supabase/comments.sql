@@ -1,0 +1,3 @@
+-- Deprecated.
+-- This project now uses Firebase Auth (Google) + Firestore for comments.
+-- See: firebase/firestore.rules and src/components/CommentsSection.tsx
