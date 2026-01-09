@@ -10,6 +10,10 @@ import MainContainer from './components/MainContainer'
 import QualityPhilosophy from './pages/QualityPhilosophy'
 import QualityPost from './pages/QualityPost'
 
+import About from './pages/About'
+import PrivacyPolicy from './pages/PrivacyPolicy'
+import Contact from './pages/Contact'
+
 import SandileCV from './pages/SandileCV';
 /* ---------------- Root ---------------- */
 
@@ -45,6 +49,24 @@ const qualityPostRoute = createRoute({
   component: QualityPost,
 })
 
+const aboutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/about',
+  component: About,
+})
+
+const privacyPolicyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/privacy-policy',
+  component: PrivacyPolicy,
+})
+
+const contactRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/contact',
+  component: Contact,
+})
+
 /* ---------------- Tree ---------------- */
 
 const routeTree = rootRoute.addChildren([
@@ -52,6 +74,9 @@ const routeTree = rootRoute.addChildren([
   qualityPhilosophyRoute,
   qualityPostRoute,
   sandileCVRoute,
+  aboutRoute,
+  privacyPolicyRoute,
+  contactRoute,
 ])
 
 export const router = createRouter({
