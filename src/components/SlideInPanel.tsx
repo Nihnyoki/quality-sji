@@ -121,10 +121,10 @@ const SlideInPanel: React.FC<SlideInPanelProps> = ({ isOpen, onClose, children }
           onClick={onClose}
           role="presentation"
         >
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-md" />
 
           <motion.aside
-            className="absolute left-4 top-4 bottom-4 bg-transparent rounded-2xl shadow-2xl overflow-hidden"
+            className="absolute left-4 top-4 bottom-4 rounded-2xl border border-zinc-300/80 bg-zinc-200/70 backdrop-blur-xl shadow-2xl overflow-hidden"
             style={{ width: '80vw', maxWidth: '80vw', minWidth: '320px' }}
             initial="hidden"
             animate="visible"
@@ -141,7 +141,7 @@ const SlideInPanel: React.FC<SlideInPanelProps> = ({ isOpen, onClose, children }
             <div className="relative h-full">
               <button
                 ref={closeButtonRef}
-                className="absolute right-6 top-6 z-20 inline-flex h-10 w-10 items-center justify-center rounded-full bg-transparent text-white/90 ring-1 ring-white/25 hover:text-white hover:shadow-xl transition"
+                className="absolute right-6 top-6 z-20 inline-flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100/70 text-zinc-900 ring-1 ring-zinc-300/80 hover:bg-zinc-50/90 transition"
                 onClick={onClose}
                 aria-label="Close panel"
                 type="button"
@@ -150,9 +150,26 @@ const SlideInPanel: React.FC<SlideInPanelProps> = ({ isOpen, onClose, children }
               </button>
 
               <div className="h-full overflow-y-auto px-6 pb-10 pt-20">
-                <div className="bg-white rounded-2xl">
-                  <div className="px-6 py-6">
-                    {children}
+                <div className="relative rounded-2xl border border-zinc-200/70 bg-zinc-50/25 backdrop-blur-md">
+                  <div className="px-6 py-6 text-zinc-900">
+                    <div className="flex flex-col lg:flex-row gap-8 items-stretch">
+                      <div className="min-w-0 flex-1">{children}</div>
+
+                      <div className="hidden lg:flex shrink-0 items-stretch">
+                        <div className="stardust-divider self-stretch" aria-hidden="true" />
+                      </div>
+
+                      <aside className="w-full lg:w-60 shrink-0">
+                        <span className="twinkle-ring mx-auto mt-2 lg:mt-3 lg:translate-x-2 block h-24 w-24">
+                          <img
+                            src="/images/a.jpeg"
+                            alt="Profile"
+                            className="block h-24 w-24 rounded-full object-cover"
+                            loading="lazy"
+                          />
+                        </span>
+                      </aside>
+                    </div>
                   </div>
                 </div>
               </div>
