@@ -74,11 +74,11 @@ const MainContainer: React.FC = () => {
     // Keep it fully hidden until the 4th second.
     terminalAnim.set({ y: 0, opacity: 0 });
 
+    // Always start the animation after 4s, even if the terminal is far down the page.
+    // Use a safe start offset (one viewport height) to avoid jumping from a huge distance.
     const t = window.setTimeout(() => {
-      const rect = el.getBoundingClientRect();
-      const startY = -rect.top;
+      const startY = -window.innerHeight;
 
-      // Jump to the start (still invisible), then fall + fade in over 1s.
       terminalAnim.set({ y: startY, opacity: 0 });
       terminalAnim.start({
         y: 0,
@@ -452,17 +452,8 @@ const MainContainer: React.FC = () => {
           </div>
         </nav>
 
-        {/* Hero Section */}
-        <header className="relative z-20 pointer-events-none" style={{ height: '65vh' }}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
-            <h1 className="font-merriweather text-4xl md:text-5xl font-semibold tracking-tight text-white drop-shadow">
-              Sandile Mnqayi
-            </h1>
-            <p className="mt-2 max-w-2xl text-base md:text-lg text-slate-200">
-              Quality SJI — systems thinking in quality, delivery, and engineering.
-            </p>
-          </div>
-        </header>
+        {/* Hero Section with 3D Objects */}
+        <header className="relative pointer-events-none" style={{ height: '65vh' }} />
 
         {/* Content Section */}
         <main className="relative z-10 bg-transparent pointer-events-none">
@@ -538,8 +529,11 @@ const MainContainer: React.FC = () => {
             </SlideInPanel>
           </div>
 
+          {/* Extend the page vertically so bottom content is reached by scroll */}
+          <div className="h-[70vh]" aria-hidden="true" />
+
           {/* Bottom dock: Posts + Compliance cards (static), Terminal (falls) */}
-          <div className="fixed bottom-8 left-0 right-0 z-20 px-4 sm:px-6 lg:px-8 pointer-events-auto">
+          <div className="px-4 sm:px-6 lg:px-8 pb-12 pointer-events-auto">
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
               <div className="order-2 md:order-1 w-full">
                 <section
@@ -650,7 +644,7 @@ const MainContainer: React.FC = () => {
 
               <motion.div
                 ref={terminalWrapRef}
-                className="order-1 md:order-2 pointer-events-none w-[min(28rem,calc(100vw-3rem))] h-[23rem] max-h-[calc(100vh-6rem)]"
+                className="order-1 md:order-2 pointer-events-none w-[min(29.75rem,calc(100vw-3rem))] h-[23rem] max-h-[calc(100vh-6rem)]"
                 initial={{ opacity: 0, y: 0 }}
                 animate={terminalAnim}
               >
