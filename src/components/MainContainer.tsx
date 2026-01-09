@@ -11,6 +11,7 @@ import { FaGithub } from 'react-icons/fa'
 import PostContent from './PostContent';
 import TypingText from './TypingText';
 import CommentsSection from './CommentsSection';
+import { cn } from '../lib/utils';
 const qualitySystemModel = '/images/quality-system.glb';
 const telemetryModel = '/images/telemetry.glb';
 
@@ -54,6 +55,7 @@ const MainContainer: React.FC = () => {
   const reduceMotionUI = useReducedMotion();
   const terminalAnim = useAnimationControls();
   const terminalWrapRef = useRef<HTMLDivElement>(null);
+  const [activeInfoCard, setActiveInfoCard] = useState<number | null>(null);
 
   useLayoutEffect(() => {
     if (reduceMotionUI) {
@@ -529,8 +531,57 @@ const MainContainer: React.FC = () => {
             initial={{ opacity: 0, y: 0 }}
             animate={terminalAnim}
           >
-            <div className="flex justify-end">
-              <div className="w-[min(28rem,calc(100vw-3rem))] h-[23rem] max-h-[calc(100vh-6rem)]">
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+              <div className="order-2 md:order-1 pointer-events-auto">
+                <div className="relative [perspective:1200px] flex flex-row-reverse items-end justify-end overflow-visible">
+                  {([
+                    { title: 'About', to: '/about', description: 'What this site is about.' },
+                    { title: 'Privacy Policy', to: '/privacy-policy', description: 'How data is handled.' },
+                    { title: 'Contact', to: '/contact', description: 'Get in touch.' },
+                  ] as const).map((card, i) => {
+                    const isActive = activeInfoCard === i;
+                    const zIndex = isActive ? 50 : 20 - i;
+                    const baseZ = -i * 80;
+                    const rotateY = 16 - i * 2;
+                    const rotateZ = 2 - i * 0.6;
+
+                    return (
+                      <div
+                        key={card.to}
+                        className={cn('relative', i === 0 ? '' : '-mr-16')}
+                        style={{ zIndex }}
+                        onMouseEnter={() => setActiveInfoCard(i)}
+                        onMouseLeave={() => setActiveInfoCard(null)}
+                      >
+                        <Link
+                          to={card.to}
+                          className={cn(
+                            'block w-[min(23rem,calc(100vw-3rem))] rounded-none border border-slate-700/60 bg-slate-900/35 backdrop-blur',
+                            'px-5 py-4 shadow-lg transition-transform duration-200',
+                            'focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300/30'
+                          )}
+                          style={{
+                            transform: isActive
+                              ? 'translate3d(0px, -6px, 0px) rotateY(8deg) rotateZ(0deg)'
+                              : `translate3d(0px, 0px, ${baseZ}px) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`,
+                            transformStyle: 'preserve-3d',
+                          }}
+                          onFocus={() => setActiveInfoCard(i)}
+                          onBlur={() => setActiveInfoCard(null)}
+                          aria-label={card.title}
+                        >
+                          <div className="font-merriweather text-base font-semibold text-slate-100">
+                            {card.title}
+                          </div>
+                          <div className="mt-1 text-sm text-slate-300">{card.description}</div>
+                        </Link>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="order-1 md:order-2 w-[min(28rem,calc(100vw-3rem))] h-[23rem] max-h-[calc(100vh-6rem)]">
                 {(() => {
               const charIntervalMs = 32;
               const gapMs = 180;
