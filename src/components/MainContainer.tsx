@@ -55,21 +55,34 @@ const MainContainer: React.FC = () => {
   const terminalWrapRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
-    if (reduceMotionUI) return;
+    if (reduceMotionUI) {
+      terminalAnim.set({ y: 0, opacity: 1 });
+      return;
+    }
 
     const el = terminalWrapRef.current;
     if (!el) return;
 
-    // Start visually at the top of the viewport, then glide down to its natural layout position.
-    const rect = el.getBoundingClientRect();
-    const startY = -rect.top;
+    // Keep it fully hidden until the 4th second.
+    terminalAnim.set({ y: 0, opacity: 0 });
 
-    terminalAnim.set({ y: startY, opacity: 1 });
-    terminalAnim.start({
-      y: 0,
-      opacity: 1,
-      transition: { duration: 120, ease: [0.22, 1, 0.36, 1] },
-    });
+    const t = window.setTimeout(() => {
+      const rect = el.getBoundingClientRect();
+      const startY = -rect.top;
+
+      // Jump to the start (still invisible), then fall + fade in over 1s.
+      terminalAnim.set({ y: startY, opacity: 0 });
+      terminalAnim.start({
+        y: 0,
+        opacity: 1,
+        transition: {
+          y: { duration: 60, ease: [0.22, 1, 0.36, 1] },
+          opacity: { duration: 1, ease: 'easeOut' },
+        },
+      });
+    }, 4000);
+
+    return () => window.clearTimeout(t);
   }, [reduceMotionUI, terminalAnim]);
 
     useEffect(() => {
@@ -505,13 +518,13 @@ const MainContainer: React.FC = () => {
           <motion.div
             ref={terminalWrapRef}
             className="mt-[85vh] px-4 sm:px-6 lg:px-8 pointer-events-none"
-            initial={false}
-            animate={reduceMotionUI ? { opacity: 1, y: 0 } : terminalAnim}
+            initial={{ opacity: 0, y: 0 }}
+            animate={terminalAnim}
           >
             <div className="flex justify-end">
               <div className="w-[min(28rem,calc(100vw-3rem))] h-[23rem] max-h-[calc(100vh-6rem)]">
                 {(() => {
-              const charIntervalMs = 18;
+              const charIntervalMs = 32;
               const gapMs = 180;
               const t1 = 'Title: Sandile Mnqayi.';
               const d1 = 'Test Automation Architect, QA Team Lead, and BDD advocate.';
