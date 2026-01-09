@@ -10,6 +10,7 @@ import SlideInPanel from './SlideInPanel';
 import { FaGithub } from 'react-icons/fa'
 import PostContent from './PostContent';
 import TypingText from './TypingText';
+import CommentsSection from './CommentsSection';
 const qualitySystemModel = '/images/quality-system.glb';
 const telemetryModel = '/images/telemetry.glb';
 
@@ -510,6 +511,13 @@ const MainContainer: React.FC = () => {
                   authorName={panelContent.post.authorName}
                   authorImage={panelContent.post.authorImage}
                 />
+
+                <div className="mt-8">
+                  <CommentsSection
+                    postId={panelContent.post.id}
+                    postType={panelContent.type}
+                  />
+                </div>
                 </article>
               )}
             </SlideInPanel>
