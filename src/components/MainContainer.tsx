@@ -133,6 +133,8 @@ const MainContainer: React.FC = () => {
         if (cancelled) return;
 
         const degToRad = (deg: number) => (deg * Math.PI) / 180;
+        const clamp01 = (t: number) => Math.min(1, Math.max(0, t));
+        const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
         const applyRotationDeg = (obj: any, rotationDeg?: [number, number, number]) => {
           if (!rotationDeg || !obj?.rotation?.set) return;
           const [rx, ry, rz] = rotationDeg;
@@ -422,7 +424,24 @@ const MainContainer: React.FC = () => {
             (model as any).scale.setScalar(scale);
 
             applyStaticTransform(model as any, cfg);
-            if (cfg.navTo) (model as any).userData = { navTo: cfg.navTo };
+
+            // Keep nav objects stationary (no __anim), but allow a one-time float-in for Sandile.
+            if (cfg.navTo) {
+              (model as any).userData = { navTo: cfg.navTo };
+
+              // Float the Sandile navigator into its target position.
+              if (!reduceMotion && cfg.navTo === '/cv') {
+                const [tx, ty, tz] = cfg.position;
+                const start: [number, number, number] = [tx, ty + 8, tz - 70];
+                (model as any).position.set(start[0], start[1], start[2]);
+                (model as any).userData.__intro = {
+                  start,
+                  end: cfg.position,
+                  startMs: performance.now(),
+                  durationMs: 2500,
+                };
+              }
+            }
 
             (scene as any).add(model);
             (objects as any).push(model);
@@ -445,6 +464,28 @@ const MainContainer: React.FC = () => {
       let rafId = 0;
       const animate = () => {
         rafId = requestAnimationFrame(animate);
+
+        // One-time intro animations (e.g., Sandile floating into place)
+        if (!reduceMotion) {
+          (objects as any).forEach((obj: any) => {
+            const intro = obj?.userData?.__intro;
+            if (!intro || !obj?.position?.set) return;
+
+            const elapsed = performance.now() - (intro.startMs ?? 0);
+            const t = clamp01((intro.durationMs ? elapsed / intro.durationMs : 1) as number);
+            const tt = easeOutCubic(t);
+
+            const [sx, sy, sz] = intro.start as [number, number, number];
+            const [ex, ey, ez] = intro.end as [number, number, number];
+            obj.position.set(sx + (ex - sx) * tt, sy + (ey - sy) * tt, sz + (ez - sz) * tt);
+
+            if (t >= 1) {
+              obj.position.set(ex, ey, ez);
+              if (obj.userData) delete obj.userData.__intro;
+            }
+          });
+        }
+
         if (!reduceMotion) {
           (objects as any).forEach((obj: any) => {
             const anim = obj?.userData?.__anim;
