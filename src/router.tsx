@@ -16,12 +16,14 @@ import Contact from './pages/Contact'
 
 import SandileCV from './pages/SandileCV';
 import AnalyticsListener from './components/AnalyticsListener';
+import ConsentBanner from './components/ConsentBanner';
 /* ---------------- Root ---------------- */
 
 const rootRoute = createRootRoute({
   component: () => (
     <>
       <AnalyticsListener />
+      <ConsentBanner />
       <Outlet />
     </>
   ),
