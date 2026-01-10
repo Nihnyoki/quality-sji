@@ -20,6 +20,7 @@ const leftStaticModel = '/images/Sandile.glb';
 type StaticGlbConfig = {
   src: string;
   position: [number, number, number];
+  mobilePosition?: [number, number, number];
   rotationDeg?: [number, number, number];
   navTo?: string;
 };
@@ -29,6 +30,7 @@ const staticGlbObjects: Record<'blogsNav' | 'sandile', StaticGlbConfig> = {
     src: blogsNavModel,
     navTo: '/quality-philosophy',
     position: [8, 3, -10],
+    mobilePosition: [3.8, 2.1, -12],
     // [x, y, z] in DEGREES: x=pitch (look up/down), y=yaw (look left/right), z=roll
     rotationDeg: [0, -90, 0],
   },
@@ -36,6 +38,7 @@ const staticGlbObjects: Record<'blogsNav' | 'sandile', StaticGlbConfig> = {
     src: leftStaticModel,
     navTo: '/cv',
     position: [-11, 4, -10],
+    mobilePosition: [-3.8, 2.4, -12],
     rotationDeg: [0, 90, 20],
   },
 };
@@ -160,8 +163,11 @@ const MainContainer: React.FC = () => {
           const [rx, ry, rz] = rotationDeg;
           obj.rotation.set(degToRad(rx), degToRad(ry), degToRad(rz));
         };
+        const isMobile3d = window.matchMedia?.('(max-width: 767px)')?.matches ?? false;
+
         const applyStaticTransform = (model: any, cfg: StaticGlbConfig) => {
-          const [x, y, z] = cfg.position;
+          const pos = isMobile3d ? (cfg.mobilePosition ?? cfg.position) : cfg.position;
+          const [x, y, z] = pos;
           model.position.set(x, y, z);
           const [rx, ry, rz] = cfg.rotationDeg ?? [0, 0, 0];
           model.rotation.set(degToRad(rx), degToRad(ry), degToRad(rz));

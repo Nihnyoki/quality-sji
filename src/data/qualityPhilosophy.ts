@@ -103,8 +103,8 @@ export const qualityPhilosophyPosts: BlogPost[] = [
       "Quality does not happen by accident.",
       "It happens when organisations choose to incentivise it."
     ],
-    image: '/images/quality-system.jpeg',
-    model: '/images/dollar.glb',
+    image: '/images/splashing-water.jpeg',
+    model: '/images/dynamic_quality_system.glb',
     authorName: 'Sandile Mnqayi',
     authorImage: '/images/SandileMnqayi.jpeg'
   },
@@ -318,7 +318,7 @@ export const qualityPhilosophyPosts: BlogPost[] = [
       "",
       "By fostering these qualities individually and within teams, we can build a true culture of excellence—on the pitch and in production."
     ],
-    image: '/images/quality-system.jpeg',
+    image: '/images/ronaldo-merci-nayma.webp',
     model: '/images/football.glb',
     authorName: 'Sandile Mnqayi',
     authorImage: '/images/SandileMnqayi.jpeg'
