@@ -15,10 +15,16 @@ import PrivacyPolicy from './pages/PrivacyPolicy'
 import Contact from './pages/Contact'
 
 import SandileCV from './pages/SandileCV';
+import AnalyticsListener from './components/AnalyticsListener';
 /* ---------------- Root ---------------- */
 
 const rootRoute = createRootRoute({
-  component: () => <Outlet />,
+  component: () => (
+    <>
+      <AnalyticsListener />
+      <Outlet />
+    </>
+  ),
 })
 
 /* ---------------- Routes ---------------- */
