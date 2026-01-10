@@ -1,76 +1,142 @@
 import React from 'react';
+import { Link } from '@tanstack/react-router';
 
 const SandileCV: React.FC = () => (
-  <div className="max-w-3xl mx-auto p-8 bg-white rounded shadow">
-    <h1 className="text-3xl font-bold mb-2">Sandile Joshua Innocent Mnqayi</h1>
-    <h2 className="text-xl text-blue-700 mb-4">QA Automation Architect | Software Engineer in Test</h2>
-    <div className="mb-4">
-      <span className="font-semibold">Centurion, Gauteng, South Africa</span><br />
-      <span>Email: <a href="mailto:wifizi.gokhinki@gmail.com" className="text-blue-600 underline">wifizi.gokhinki@gmail.com</a></span><br />
-      <span>Mobile: 067 932 3805</span><br />
-      <span>GitHub: <a href="https://github.com/Nihnyoki" className="text-blue-600 underline">Nihnyoki</a></span><br />
-      <span>YouTube: <a href="https://www.youtube.com/channel/UCR8DJ0lguiwKsDIRZ3v_fjw" className="text-blue-600 underline">Channel</a></span>
+  <main className="min-h-screen bg-transparent">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <section className="rounded-none border border-slate-700/60 bg-slate-900/35 backdrop-blur shadow-sm p-6">
+        <div className="flex flex-col gap-4">
+          <div>
+            <h1 className="font-merriweather text-2xl sm:text-3xl font-semibold text-slate-50">
+              Sandile Joshua Innocent Mnqayi
+            </h1>
+            <p className="mt-2 text-slate-200/90">
+              QA Test Lead / Automation Architect — building reliable quality systems with pragmatic automation, risk-based strategy, and strong engineering collaboration.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-3 text-sm text-slate-200/90">
+            <span className="inline-flex items-center rounded-none border border-slate-700/60 bg-slate-900/45 px-3 py-1">
+              Centurion, Gauteng (South Africa)
+            </span>
+            <a
+              href="mailto:wifizi.gokhinki@gmail.com"
+              className="inline-flex items-center rounded-none border border-slate-700/60 bg-slate-900/45 px-3 py-1 hover:bg-slate-900/65"
+            >
+              Email
+            </a>
+            <a
+              href="https://github.com/Nihnyoki"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center rounded-none border border-slate-700/60 bg-slate-900/45 px-3 py-1 hover:bg-slate-900/65"
+            >
+              GitHub
+            </a>
+            <a
+              href="https://www.youtube.com/channel/UCR8DJ0lguiwKsDIRZ3v_fjw"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center rounded-none border border-slate-700/60 bg-slate-900/45 px-3 py-1 hover:bg-slate-900/65"
+            >
+              YouTube
+            </a>
+            <Link
+              to="/quality-philosophy"
+              className="inline-flex items-center rounded-none border border-slate-700/60 bg-slate-900/45 px-3 py-1 hover:bg-slate-900/65"
+            >
+              Blog
+            </Link>
+            <a
+              href="/doc/cv_latest.pdf"
+              className="inline-flex items-center rounded-none border border-slate-700/60 bg-slate-900/45 px-3 py-1 hover:bg-slate-900/65"
+            >
+              Download CV
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <section className="rounded-none border border-slate-700/60 bg-slate-900/35 backdrop-blur shadow-sm p-6">
+          <h2 className="font-merriweather text-lg font-semibold text-slate-50">What I Do</h2>
+          <ul className="mt-3 space-y-2 text-slate-200/90 text-sm list-disc ml-5">
+            <li>Design scalable automation frameworks (UI, API, integration) and quality gates for CI/CD.</li>
+            <li>Lead QA teams with clear strategy, coaching, and measurable quality outcomes.</li>
+            <li>Translate business risk into effective test strategy (coverage where it matters most).</li>
+            <li>Drive testing maturity: observability, telemetry-informed coverage, and fast feedback loops.</li>
+          </ul>
+        </section>
+
+        <section className="rounded-none border border-slate-700/60 bg-slate-900/35 backdrop-blur shadow-sm p-6">
+          <h2 className="font-merriweather text-lg font-semibold text-slate-50">Core Skills</h2>
+          <ul className="mt-3 space-y-2 text-slate-200/90 text-sm list-disc ml-5">
+            <li>Test Automation Architecture & Framework Design</li>
+            <li>BDD & Living Documentation (Cucumber)</li>
+            <li>API, Backend & Integration Testing</li>
+            <li>CI/CD Quality Gates and release readiness</li>
+            <li>QA leadership, mentorship, and delivery enablement</li>
+            <li>Agile & hybrid SDLC execution</li>
+          </ul>
+        </section>
+      </div>
+
+      <section className="mt-6 rounded-none border border-slate-700/60 bg-slate-900/35 backdrop-blur shadow-sm p-6">
+        <h2 className="font-merriweather text-lg font-semibold text-slate-50">Selected Experience</h2>
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-slate-200/90">
+          <div className="rounded-none border border-slate-700/60 bg-slate-900/45 p-4">
+            <div className="font-semibold text-slate-50">4-SURE Technology Solutions</div>
+            <div className="text-slate-300">QA Lead / Senior QA Engineer (2023 – Present)</div>
+            <ul className="mt-2 list-disc ml-5 space-y-1">
+              <li>Lead a QA team of 5 engineers in a SaaS environment.</li>
+              <li>Define and execute QA strategy across enterprise clients.</li>
+              <li>Introduce scalable automation frameworks and quality practices.</li>
+            </ul>
+          </div>
+          <div className="rounded-none border border-slate-700/60 bg-slate-900/45 p-4">
+            <div className="font-semibold text-slate-50">Banking & Enterprise Delivery</div>
+            <div className="text-slate-300">ABSA • WesBank • Nedbank (2017 – 2020)</div>
+            <ul className="mt-2 list-disc ml-5 space-y-1">
+              <li>Automation strategy per system context (desktop, web, APIs).</li>
+              <li>API and integration testing in regulated environments.</li>
+              <li>Java-based frameworks and enterprise-grade test approach.</li>
+            </ul>
+          </div>
+          <div className="rounded-none border border-slate-700/60 bg-slate-900/45 p-4">
+            <div className="font-semibold text-slate-50">Test Leadership</div>
+            <div className="text-slate-300">Concurrent Systems (2013 – 2016)</div>
+            <ul className="mt-2 list-disc ml-5 space-y-1">
+              <li>Led test strategy and mentored junior engineers.</li>
+              <li>Built repeatable delivery patterns for quality assurance.</li>
+            </ul>
+          </div>
+          <div className="rounded-none border border-slate-700/60 bg-slate-900/45 p-4">
+            <div className="font-semibold text-slate-50">Systems Testing</div>
+            <div className="text-slate-300">Kapsch TrafficCom (2016 – 2017)</div>
+            <ul className="mt-2 list-disc ml-5 space-y-1">
+              <li>End-to-end testing across software + hardware systems.</li>
+              <li>Support-driven feedback into test strategy and regression coverage.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section className="mt-6 rounded-none border border-slate-700/60 bg-slate-900/35 backdrop-blur shadow-sm p-6">
+        <h2 className="font-merriweather text-lg font-semibold text-slate-50">Quality Architecture Philosophy</h2>
+        <p className="mt-3 text-sm text-slate-200/90 leading-relaxed">
+          I treat quality as a system-level design concern, not a phase in the SDLC. The goal is to build testability into architecture and pipelines,
+          use automation as an enabling platform, and continuously align coverage to real user risk.
+        </p>
+        <ul className="mt-3 space-y-2 text-slate-200/90 text-sm list-disc ml-5">
+          <li>Quality built into architecture, pipelines, and delivery workflows</li>
+          <li>Automation frameworks treated as long-lived platforms</li>
+          <li>Test strategy aligned to risk, business value, and system complexity</li>
+          <li>Observability, telemetry, and feedback loops as first-class quality signals</li>
+          <li>Strong collaboration across QA, engineering, and product</li>
+        </ul>
+      </section>
     </div>
-    <h3 className="text-lg font-semibold mt-6 mb-2">Professional Summary</h3>
-    <p className="mb-4">
-      QA Automation Architect with over 15 years of experience designing, implementing, and scaling quality assurance and test automation solutions across banking, telecommunications, SaaS, and enterprise systems. Specialist in automation strategy, test architecture, CI/CD quality gates, and framework design, with deep hands-on expertise in Java-based automation, BDD (Cucumber), API testing, and system integration testing.
-    </p>
-    <h3 className="text-lg font-semibold mt-6 mb-2">Core Competencies</h3>
-    <ul className="list-disc ml-6 mb-4">
-      <li>Test Automation Architecture & Framework Design</li>
-      <li>BDD & Living Documentation (Cucumber)</li>
-      <li>API, Backend & Integration Testing</li>
-      <li>CI/CD Quality Gates</li>
-      <li>QA Leadership & Mentorship</li>
-      <li>Agile & Hybrid SDLC</li>
-    </ul>
-    <h3 className="text-lg font-semibold mt-6 mb-2">Professional Experience</h3>
-    <ul className="list-disc ml-6 mb-4">
-      <li><b>4-SURE Technology Solutions</b> – QA Lead / Senior QA Engineer (2023 – Present)<br />
-        Lead a QA team of 5 engineers in a SaaS environment.<br />
-        Define and execute QA strategy across multiple enterprise clients.<br />
-        Introduce scalable automation frameworks and quality practices.
-      </li>
-      <li><b>Nedbank</b> – Automation Engineer (2020)<br />
-        Delivered desktop, API, and web automation solutions.<br />
-        Designed automation strategies per system context.
-      </li>
-      <li><b>WesBank</b> – Automation Engineer (2018 – 2020)<br />
-        Automated banking APIs and payment mandate systems.<br />
-        Built Java-based automation frameworks.
-      </li>
-      <li><b>ABSA</b> – Web Services Tester (2017 – 2018)<br />
-        API and integration testing within regulated banking systems.
-      </li>
-      <li><b>Kapsch TrafficCom</b> – QA & Third Line Support Engineer (2016 – 2017)<br />
-        End-to-end testing across software and hardware systems.
-      </li>
-      <li><b>Concurrent Systems</b> – Test Lead Engineer (2013 – 2016)<br />
-        Led test strategy and mentored junior engineers.
-      </li>
-    </ul>
-    <h3 className="text-lg font-semibold mt-6 mb-2">Education</h3>
-    <ul className="ml-6 mb-4">
-      <li>National Diploma in Electrical Engineering (Telecommunications)<br />
-        Mangosuthu University of Technology<br />
-        Dean’s Commendation for Academic Excellence
-      </li>
-    </ul>
-    <h3 className="text-lg font-semibold mt-6 mb-2">Quality Architecture Philosophy</h3>
-    <p className="mb-4">
-      I believe quality is a system-level architectural concern, not a phase in the SDLC. My approach to Quality Architecture focuses on designing testability into systems from the outset, using automation as an enabling platform rather than a verification afterthought.
-    </p>
-    <ul className="list-disc ml-6 mb-4">
-      <li>Quality built into architecture, pipelines, and delivery workflows</li>
-      <li>Automation frameworks treated as long-lived platforms</li>
-      <li>Test strategy aligned to risk, business value, and system complexity</li>
-      <li>Observability, telemetry, and feedback loops as first-class quality signals</li>
-      <li>Strong collaboration between QA, engineering, product and AI 🙂</li>
-    </ul>
-    <p className="mb-4">
-      I regularly write about Quality Architecture, test automation strategy, and system thinking in QA on my blog: <a href="https://quality-sji.vercel.app/quality-philosophy" className="text-blue-600 underline">Quality Philosophy Blog</a>
-    </p>
-  </div>
+  </main>
 );
 
 export default SandileCV;
