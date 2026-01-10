@@ -153,21 +153,6 @@ const SlideInPanel: React.FC<SlideInPanelProps> = ({ isOpen, onClose, children }
                   <div className="px-6 py-6 text-zinc-900">
                     <div className="flex flex-col lg:flex-row gap-8 items-stretch">
                       <div className="min-w-0 flex-1">{children}</div>
-
-                      <div className="hidden lg:flex shrink-0 items-stretch">
-                        <div className="stardust-divider self-stretch" aria-hidden="true" />
-                      </div>
-
-                      <aside className="w-full lg:w-60 shrink-0">
-                        <span className="twinkle-ring mx-auto mt-2 lg:mt-3 lg:translate-x-2 block h-24 w-24">
-                          <img
-                            src="/images/a.jpeg"
-                            alt="Profile"
-                            className="block h-24 w-24 rounded-full object-cover"
-                            loading="lazy"
-                          />
-                        </span>
-                      </aside>
                     </div>
                   </div>
                 </div>

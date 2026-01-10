@@ -1,4 +1,4 @@
-import { useParams } from '@tanstack/react-router'
+import { Link, useParams } from '@tanstack/react-router'
 import { qualityPhilosophyPosts } from '../data/qualityPhilosophy'
 import PostContent from '../components/PostContent'
 
@@ -13,6 +13,14 @@ export default function QualityPost() {
 
   return (
     <article className="max-w-5xl mx-auto px-6 py-12">
+      <div className="mb-6">
+        <Link
+          to="/"
+          className="inline-flex items-center rounded-full border border-zinc-300 bg-white/70 px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-white"
+        >
+          Back home
+        </Link>
+      </div>
       <header className="mb-10">
         <h1 className="text-3xl font-semibold mb-2">{post.title}</h1>
 

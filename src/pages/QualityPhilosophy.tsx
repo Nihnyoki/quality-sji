@@ -15,6 +15,14 @@ function getExcerpt(content: string[]) {
 export default function QualityPhilosophy() {
   return (
     <main className="max-w-4xl mx-auto px-6 py-12">
+      <div className="mb-6">
+        <Link
+          to="/"
+          className="inline-flex items-center rounded-full border border-zinc-300 bg-white/70 px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-white"
+        >
+          Back home
+        </Link>
+      </div>
       <header className="mb-12">
         <h1 className="text-3xl font-semibold mb-3">
           Quality Philosophy
