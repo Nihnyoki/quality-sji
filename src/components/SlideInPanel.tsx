@@ -124,7 +124,7 @@ const SlideInPanel: React.FC<SlideInPanelProps> = ({ isOpen, onClose, children }
           <div className="absolute inset-0 bg-black/70 backdrop-blur-md" />
 
           <motion.aside
-            className="absolute inset-0 sm:left-4 sm:top-4 sm:bottom-4 sm:inset-x-auto sm:rounded-2xl border border-zinc-300/80 bg-zinc-200/70 backdrop-blur-xl shadow-2xl overflow-hidden w-full sm:w-[80vw] sm:max-w-[80vw] sm:min-w-[320px]"
+            className="absolute inset-0 sm:left-4 sm:top-4 sm:bottom-4 sm:inset-x-auto sm:rounded-2xl border border-gray-300 bg-white shadow-2xl overflow-hidden w-full sm:w-[80vw] sm:max-w-[80vw] sm:min-w-[320px]"
             initial="hidden"
             animate="visible"
             exit="exit"
@@ -140,7 +140,7 @@ const SlideInPanel: React.FC<SlideInPanelProps> = ({ isOpen, onClose, children }
             <div className="relative h-full">
               <button
                 ref={closeButtonRef}
-                className="absolute right-4 top-4 sm:right-6 sm:top-6 z-20 inline-flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100/70 text-zinc-900 ring-1 ring-zinc-300/80 hover:bg-zinc-50/90 transition"
+                className="absolute right-4 top-4 sm:right-6 sm:top-6 z-20 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-zinc-900 ring-1 ring-gray-300 hover:bg-gray-50 transition"
                 onClick={onClose}
                 aria-label="Close panel"
                 type="button"
@@ -149,10 +149,14 @@ const SlideInPanel: React.FC<SlideInPanelProps> = ({ isOpen, onClose, children }
               </button>
 
               <div className="h-full overflow-y-auto px-4 sm:px-6 pb-10 pt-16 sm:pt-20">
-                <div className="relative rounded-2xl border border-zinc-200/70 bg-zinc-50/25 backdrop-blur-md">
+                <div className="relative rounded-2xl border border-gray-200 bg-white">
                   <div className="px-6 py-6 text-zinc-900">
                     <div className="flex flex-col lg:flex-row gap-8 items-stretch">
                       <div className="min-w-0 flex-1">{children}</div>
+
+                      <div className="hidden lg:flex shrink-0 items-stretch">
+                        <div className="stardust-divider self-stretch" aria-hidden="true" />
+                      </div>
                     </div>
                   </div>
                 </div>
