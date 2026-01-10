@@ -15,6 +15,30 @@ import { cn } from '../lib/utils';
 const qualitySystemModel = '/images/quality-system.glb';
 const telemetryModel = '/images/telemetry.glb';
 const blogsNavModel = '/images/blogs.glb';
+const leftStaticModel = '/images/Sandile.glb';
+
+type StaticGlbConfig = {
+  src: string;
+  position: [number, number, number];
+  rotationDeg?: [number, number, number];
+  navTo?: string;
+};
+
+const staticGlbObjects: Record<'blogsNav' | 'sandile', StaticGlbConfig> = {
+  blogsNav: {
+    src: blogsNavModel,
+    navTo: '/quality-philosophy',
+    position: [8, 3, -10],
+    // [x, y, z] in DEGREES: x=pitch (look up/down), y=yaw (look left/right), z=roll
+    rotationDeg: [0, -90, 0],
+  },
+  sandile: {
+    src: leftStaticModel,
+    navTo: '/cv',
+    position: [-11, 4, -10],
+    rotationDeg: [0, 90, 20],
+  },
+};
 
 function extractYouTubeIdFromText(text: string): string | undefined {
   const candidates = [
@@ -108,6 +132,19 @@ const MainContainer: React.FC = () => {
         const { CSS3DRenderer, CSS3DObject } = await import('three/examples/jsm/renderers/CSS3DRenderer.js');
         if (cancelled) return;
 
+        const degToRad = (deg: number) => (deg * Math.PI) / 180;
+        const applyRotationDeg = (obj: any, rotationDeg?: [number, number, number]) => {
+          if (!rotationDeg || !obj?.rotation?.set) return;
+          const [rx, ry, rz] = rotationDeg;
+          obj.rotation.set(degToRad(rx), degToRad(ry), degToRad(rz));
+        };
+        const applyStaticTransform = (model: any, cfg: StaticGlbConfig) => {
+          const [x, y, z] = cfg.position;
+          model.position.set(x, y, z);
+          const [rx, ry, rz] = cfg.rotationDeg ?? [0, 0, 0];
+          model.rotation.set(degToRad(rx), degToRad(ry), degToRad(rz));
+        };
+
         const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
 
         // Set up the scene, camera, and renderer
@@ -166,15 +203,29 @@ const MainContainer: React.FC = () => {
         container.appendChild(cssRenderer.domElement);
 
       // Prepare posts
-      const posts: Array<{ id: string; type: PostType; title: string; link: string; delay: number; image?: string; model?: string; youtubeId?: string; }> = [
+      const posts: Array<{
+        id: string;
+        type: PostType;
+        title: string;
+        link: string;
+        delay: number;
+        image?: string;
+        model?: string;
+        youtubeId?: string;
+        position?: [number, number, number];
+        rotationDeg?: [number, number, number];
+      }> = [
         ...qualityPhilosophyPosts.map((post: BlogPost, i: number) => ({
           id: post.id,
           type: 'quality' as PostType,
           title: post.title,
           link: `/quality/${post.id}`,
-          delay: Math.random() * 5,
+          // If an explicit position is provided, do not add random delay-based Z offsets.
+          delay: post.position ? 0 : Math.random() * 5,
           image: post.image,
           model: post.model ?? (i % 2 === 0 ? qualitySystemModel : telemetryModel),
+          position: post.position,
+          rotationDeg: post.rotationDeg,
         })),
         ...videoPosts.map((post: VideoPost, i: number) => ({
           id: post.id,
@@ -213,8 +264,9 @@ const MainContainer: React.FC = () => {
         obj.userData.__anim = makeAnimData(x, y, zReset);
       };
 
-      const initialXs = posts.map(() => Math.random() * 30 - 15);
-      const initialYs = posts.map(() => Math.random() * 16 - 8);
+      const initialXs = posts.map((p) => (p.position?.[0] ?? (Math.random() * 30 - 15)));
+      const initialYs = posts.map((p) => (p.position?.[1] ?? (Math.random() * 16 - 8)));
+      const initialZResets = posts.map((p) => (p.position?.[2] ?? (-20 - p.delay * 10)));
 
       posts.forEach((post, index) => {
         if (post.type === 'video' && post.youtubeId) {
@@ -263,8 +315,9 @@ const MainContainer: React.FC = () => {
           const planeMesh = new THREE.Mesh(planeGeo, planeMat) as unknown as THREE_NS.Object3D;
           const x = initialXs[index];
           const y = initialYs[index];
-          const zReset = -20 - post.delay * 10;
+          const zReset = initialZResets[index];
           (planeMesh as any).position.set(x, y, zReset);
+          applyRotationDeg(planeMesh as any, post.rotationDeg);
           (planeMesh as any).userData = { link: post.link, postType: post.type, postId: post.id, youtubeId: post.youtubeId };
           attachAnim(planeMesh as any, x, y, zReset);
           (planeMesh as any).add(cssObject);
@@ -303,8 +356,9 @@ const MainContainer: React.FC = () => {
           const planeMesh = new THREE.Mesh(planeGeo, planeMat) as unknown as THREE_NS.Object3D;
           const x = initialXs[index];
           const y = initialYs[index];
-          const zReset = -20 - post.delay * 10;
+          const zReset = initialZResets[index];
           (planeMesh as any).position.set(x, y, zReset);
+          applyRotationDeg(planeMesh as any, post.rotationDeg);
           (planeMesh as any).userData = { link: post.link, postType: post.type, postId: post.id };
           attachAnim(planeMesh as any, x, y, zReset);
           (planeMesh as any).add(cssObject);
@@ -326,8 +380,9 @@ const MainContainer: React.FC = () => {
               (model as any).scale.setScalar(scale);
               const x = initialXs[index];
               const y = initialYs[index];
-              const zReset = -20 - post.delay * 10;
+              const zReset = initialZResets[index];
               (model as any).position.set(x, y, zReset);
+              applyRotationDeg(model as any, post.rotationDeg);
               (model as any).userData = { link: post.link, postType: post.type, postId: post.id };
               attachAnim(model as any, x, y, zReset);
               (scene as any).add(model);
@@ -344,8 +399,9 @@ const MainContainer: React.FC = () => {
           const mesh = new THREE.Mesh(geometry, material) as unknown as THREE_NS.Object3D;
           const x = initialXs[index];
           const y = initialYs[index];
-          const zReset = -20 - post.delay * 10;
+          const zReset = initialZResets[index];
           (mesh as any).position.set(x, y, zReset);
+          applyRotationDeg(mesh as any, post.rotationDeg);
           (mesh as any).userData = { link: post.link, postType: post.type, postId: post.id };
           attachAnim(mesh as any, x, y, zReset);
           (scene as any).add(mesh);
@@ -353,33 +409,30 @@ const MainContainer: React.FC = () => {
         }
       });
 
-      // Dedicated navigation object: clicking it routes to /quality-philosophy.
-      loader.load(
-        blogsNavModel,
-        (gltf: any) => {
-          const model = gltf.scene as unknown as THREE_NS.Object3D;
-          const box = new THREE.Box3().setFromObject(model);
-          const size = new THREE.Vector3();
-          box.getSize(size);
-          const maxDim = Math.max(size.x, size.y, size.z);
-          const scale = maxDim > 0 ? 4 / maxDim : 1;
-          (model as any).scale.setScalar(scale);
+      (Object.values(staticGlbObjects) as StaticGlbConfig[]).forEach((cfg) => {
+        loader.load(
+          cfg.src,
+          (gltf: any) => {
+            const model = gltf.scene as unknown as THREE_NS.Object3D;
+            const box = new THREE.Box3().setFromObject(model);
+            const size = new THREE.Vector3();
+            box.getSize(size);
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const scale = maxDim > 0 ? 4 / maxDim : 1;
+            (model as any).scale.setScalar(scale);
 
-          // Keep it stable and visible at the top-right.
-          // Move slightly down (Y) and closer to the camera (Z).
-          (model as any).position.set(8, 3, -10);
-          // Rotate 90° so it's not edge-on, and face it toward the camera.
-          (model as any).rotation.y = -Math.PI / 2;
-          (model as any).userData = { navTo: '/quality-philosophy' };
+            applyStaticTransform(model as any, cfg);
+            if (cfg.navTo) (model as any).userData = { navTo: cfg.navTo };
 
-          (scene as any).add(model);
-          (objects as any).push(model);
-        },
-        undefined,
-        (error: any) => {
-          console.error('An error occurred while loading the blogs nav model:', error);
-        }
-      );
+            (scene as any).add(model);
+            (objects as any).push(model);
+          },
+          undefined,
+          (error: any) => {
+            console.error('An error occurred while loading a static model:', error);
+          }
+        );
+      });
 
       // Lighting
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -478,9 +531,9 @@ const MainContainer: React.FC = () => {
           const root = findInteractiveRoot(intersects[0].object as any);
           const userData = (root as any)?.userData || {};
 
-          if (userData?.navTo === '/quality-philosophy') {
+          if (typeof userData?.navTo === 'string' && userData.navTo.trim()) {
             setPanelOpen(false);
-            navigate({ to: '/quality-philosophy' });
+            navigate({ to: userData.navTo });
             return;
           }
 
