@@ -12,10 +12,20 @@
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
 
-      gtag('config', 'G-TY211RGRND');
+      // Consent Mode (default denied until user makes a choice)
+      gtag('consent', 'default', {
+        ad_storage: 'denied',
+        analytics_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        security_storage: 'granted'
+      });
+
+      // Initialize GA but do not send a page_view until the user grants consent.
+      gtag('config', 'G-TY211RGRND', { send_page_view: false });
     </script>
 
-    <title>Swiper</title>
+    <title>Sandiles Blog</title>
   </head>
   <body>
     <div id="root"></div>
