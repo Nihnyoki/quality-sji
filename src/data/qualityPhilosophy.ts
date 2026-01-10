@@ -1,6 +1,8 @@
 export interface BlogPost {
   image: string; // thumbnail image path
   model?: string; // optional GLB model path for 3D
+  position?: [number, number, number]; // optional [x, y, z] position for 3D scene
+  rotationDeg?: [number, number, number]; // optional [x, y, z] rotation in degrees for 3D scene
   authorName?: string;
   authorImage?: string;
   id: string;
