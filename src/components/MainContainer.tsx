@@ -82,6 +82,7 @@ const MainContainer: React.FC = () => {
   const terminalAnim = useAnimationControls();
   const terminalWrapRef = useRef<HTMLDivElement>(null);
   const [activeInfoCard, setActiveInfoCard] = useState<number | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   const openPost = (type: PostType, post: BlogPost | VideoPost | ProjectPost) => {
     setPanelContent({ type, post });
@@ -118,6 +119,25 @@ const MainContainer: React.FC = () => {
 
     return () => window.clearTimeout(t);
   }, [reduceMotionUI, terminalAnim]);
+
+  useEffect(() => {
+    const mq = window.matchMedia?.('(max-width: 767px)');
+    if (!mq) return;
+
+    const apply = () => setIsMobile(Boolean(mq.matches));
+    apply();
+
+    // Safari fallback
+    const anyMq = mq as any;
+    if (typeof mq.addEventListener === 'function') {
+      mq.addEventListener('change', apply);
+      return () => mq.removeEventListener('change', apply);
+    }
+    if (typeof anyMq.addListener === 'function') {
+      anyMq.addListener(apply);
+      return () => anyMq.removeListener(apply);
+    }
+  }, []);
 
     useEffect(() => {
       const container = containerRef.current;
@@ -635,7 +655,7 @@ const MainContainer: React.FC = () => {
     }, [navigate]);
 
     return (
-      <div className="min-h-screen bg-gray-100 relative">
+      <div className="min-h-screen bg-gray-100 relative overflow-x-hidden">
         {/* Full-viewport 3D background (visible behind content) */}
         <div ref={containerRef} className="fixed inset-0 z-0" />
 
@@ -652,7 +672,7 @@ const MainContainer: React.FC = () => {
         </nav>
 
         {/* Hero Section with 3D Objects */}
-        <header className="relative pointer-events-none" style={{ height: '65vh' }} />
+        <header className="relative pointer-events-none" style={{ height: isMobile ? '52vh' : '65vh' }} />
 
         {/* Content Section */}
         <main className="relative z-10 bg-transparent pointer-events-none">
@@ -739,17 +759,17 @@ const MainContainer: React.FC = () => {
                   aria-label="Posts"
                   className="w-full rounded-none border border-slate-700/60 bg-slate-900/35 backdrop-blur shadow-sm"
                 >
-                  <div className="px-5 py-4">
+                  <div className="px-4 py-3 sm:px-5 sm:py-4">
                     <div className="font-merriweather text-base font-semibold text-slate-100">Posts</div>
-                    <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
                       <div>
                         <div className="text-xs font-medium tracking-wide text-slate-300">Quality</div>
-                        <div className="mt-2 max-h-36 overflow-auto">
+                        <div className="mt-2 max-h-32 sm:max-h-36 overflow-auto overscroll-contain touch-pan-y pr-2">
                           {qualityPhilosophyPosts.map((post) => (
                             <button
                               key={post.id}
                               type="button"
-                              className="block w-full text-left text-sm text-slate-200/90 hover:text-white py-1"
+                              className="block w-full text-left text-[0.95rem] sm:text-sm text-slate-200/90 hover:text-white py-2 leading-snug"
                               onClick={() => openPost('quality', post)}
                             >
                               {post.title}
@@ -759,12 +779,12 @@ const MainContainer: React.FC = () => {
                       </div>
                       <div>
                         <div className="text-xs font-medium tracking-wide text-slate-300">Videos</div>
-                        <div className="mt-2 max-h-36 overflow-auto">
+                        <div className="mt-2 max-h-32 sm:max-h-36 overflow-auto overscroll-contain touch-pan-y pr-2">
                           {videoPosts.map((post) => (
                             <button
                               key={post.id}
                               type="button"
-                              className="block w-full text-left text-sm text-slate-200/90 hover:text-white py-1"
+                              className="block w-full text-left text-[0.95rem] sm:text-sm text-slate-200/90 hover:text-white py-2 leading-snug"
                               onClick={() => openPost('video', post)}
                             >
                               {post.title}
@@ -774,12 +794,12 @@ const MainContainer: React.FC = () => {
                       </div>
                       <div>
                         <div className="text-xs font-medium tracking-wide text-slate-300">Projects</div>
-                        <div className="mt-2 max-h-36 overflow-auto">
+                        <div className="mt-2 max-h-32 sm:max-h-36 overflow-auto overscroll-contain touch-pan-y pr-2">
                           {projectPosts.map((post) => (
                             <button
                               key={post.id}
                               type="button"
-                              className="block w-full text-left text-sm text-slate-200/90 hover:text-white py-1"
+                              className="block w-full text-left text-[0.95rem] sm:text-sm text-slate-200/90 hover:text-white py-2 leading-snug"
                               onClick={() => openPost('project', post)}
                             >
                               {post.title}
@@ -792,14 +812,14 @@ const MainContainer: React.FC = () => {
                 </section>
 
                 <div className="mt-6">
-                  <div className="relative [perspective:1200px] flex flex-row-reverse items-end justify-end overflow-visible">
+                  <div className="relative [perspective:1200px] flex flex-col gap-3 md:flex-row-reverse md:items-end md:justify-end overflow-visible">
                     {([
                       { title: 'About', to: '/about', description: 'What this site is about.' },
                       { title: 'Privacy Policy', to: '/privacy-policy', description: 'How data is handled.' },
                       { title: 'Contact', to: '/contact', description: 'Get in touch.' },
                     ] as const).map((card, i) => {
                       const isActive = activeInfoCard === i;
-                      const zIndex = isActive ? 50 : 20 - i;
+                      const zIndex = isMobile ? 1 : isActive ? 50 : 20 - i;
                       const baseZ = -i * 80;
                       const rotateY = 16 - i * 2;
                       const rotateZ = 2 - i * 0.6;
@@ -807,7 +827,7 @@ const MainContainer: React.FC = () => {
                       return (
                         <div
                           key={card.to}
-                          className={cn('relative', i === 0 ? '' : '-mr-16')}
+                          className={cn('relative', i === 0 ? '' : 'md:-mr-16')}
                           style={{ zIndex }}
                           onMouseEnter={() => setActiveInfoCard(i)}
                           onMouseLeave={() => setActiveInfoCard(null)}
@@ -820,9 +840,13 @@ const MainContainer: React.FC = () => {
                               'focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300/30'
                             )}
                             style={{
-                              transform: isActive
-                                ? 'translate3d(0px, -6px, 0px) rotateY(8deg) rotateZ(0deg)'
-                                : `translate3d(0px, 0px, ${baseZ}px) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`,
+                              transform: isMobile
+                                ? isActive
+                                  ? 'translate3d(0px, -4px, 0px)'
+                                  : 'translate3d(0px, 0px, 0px)'
+                                : isActive
+                                  ? 'translate3d(0px, -6px, 0px) rotateY(8deg) rotateZ(0deg)'
+                                  : `translate3d(0px, 0px, ${baseZ}px) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`,
                               transformStyle: 'preserve-3d',
                             }}
                             onFocus={() => setActiveInfoCard(i)}
@@ -843,7 +867,7 @@ const MainContainer: React.FC = () => {
 
               <motion.div
                 ref={terminalWrapRef}
-                className="order-1 md:order-2 pointer-events-none w-[min(29.75rem,calc(100vw-3rem))] h-[23rem] max-h-[calc(100vh-6rem)]"
+                className="order-1 md:order-2 pointer-events-none w-[min(29.75rem,calc(100vw-2rem))] sm:w-[min(29.75rem,calc(100vw-3rem))] h-[20rem] sm:h-[23rem] max-h-[calc(100vh-6rem)]"
                 initial={{ opacity: 0, y: 0 }}
                 animate={terminalAnim}
               >
@@ -869,7 +893,7 @@ const MainContainer: React.FC = () => {
               const s8 = s7 + t4.length * charIntervalMs + gapMs;
 
               const rowBase =
-                'pointer-events-auto block flex-1 px-5 py-3 font-mono font-light transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300/30 hover:bg-slate-900/65 overflow-hidden';
+                'pointer-events-auto block flex-1 px-5 py-4 sm:py-3 font-mono font-light transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300/30 hover:bg-slate-900/65 overflow-hidden';
 
               return (
                 <div className="h-full rounded-none border border-slate-700/60 bg-slate-900/55 backdrop-blur shadow-sm overflow-hidden flex flex-col">
@@ -885,7 +909,7 @@ const MainContainer: React.FC = () => {
                     className={rowBase}
                     aria-label="Open CV"
                   >
-                    <div className="h-full flex flex-col justify-center text-sm text-slate-300 space-y-1 leading-snug">
+                    <div className="h-full flex flex-col justify-center text-[0.95rem] sm:text-sm text-slate-300 space-y-1 leading-snug">
                       <div>
                         <TypingText
                           text={t1}
@@ -912,7 +936,7 @@ const MainContainer: React.FC = () => {
                     className={rowBase}
                     aria-label="Open GitHub profile"
                   >
-                    <div className="h-full flex flex-col justify-center text-sm text-slate-300 space-y-1 leading-snug">
+                    <div className="h-full flex flex-col justify-center text-[0.95rem] sm:text-sm text-slate-300 space-y-1 leading-snug">
                       <div>
                         <TypingText
                           text={t2}
@@ -939,7 +963,7 @@ const MainContainer: React.FC = () => {
                     className={rowBase}
                     aria-label="Open YouTube channel"
                   >
-                    <div className="h-full flex flex-col justify-center text-sm text-slate-300 space-y-1 leading-snug">
+                    <div className="h-full flex flex-col justify-center text-[0.95rem] sm:text-sm text-slate-300 space-y-1 leading-snug">
                       <div>
                         <TypingText
                           text={t3}
