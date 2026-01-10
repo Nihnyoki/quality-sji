@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type * as THREE_NS from 'three';
 import { motion, useAnimationControls, useReducedMotion } from 'framer-motion';
@@ -14,6 +14,7 @@ import CommentsSection from './CommentsSection';
 import { cn } from '../lib/utils';
 const qualitySystemModel = '/images/quality-system.glb';
 const telemetryModel = '/images/telemetry.glb';
+const blogsNavModel = '/images/blogs.glb';
 
 function extractYouTubeIdFromText(text: string): string | undefined {
   const candidates = [
@@ -52,6 +53,7 @@ const MainContainer: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const [panelContent, setPanelContent] = useState<PanelContent>(null);
+  const navigate = useNavigate();
   const reduceMotionUI = useReducedMotion();
   const terminalAnim = useAnimationControls();
   const terminalWrapRef = useRef<HTMLDivElement>(null);
@@ -164,13 +166,14 @@ const MainContainer: React.FC = () => {
         container.appendChild(cssRenderer.domElement);
 
       // Prepare posts
-      const posts: Array<{ id: string; type: PostType; title: string; link: string; delay: number; model?: string; youtubeId?: string; }> = [
+      const posts: Array<{ id: string; type: PostType; title: string; link: string; delay: number; image?: string; model?: string; youtubeId?: string; }> = [
         ...qualityPhilosophyPosts.map((post: BlogPost, i: number) => ({
           id: post.id,
           type: 'quality' as PostType,
           title: post.title,
           link: `/quality/${post.id}`,
           delay: Math.random() * 5,
+          image: post.image,
           model: post.model ?? (i % 2 === 0 ? qualitySystemModel : telemetryModel),
         })),
         ...videoPosts.map((post: VideoPost, i: number) => ({
@@ -179,6 +182,7 @@ const MainContainer: React.FC = () => {
           title: post.title,
           link: `/videos/${post.id}`,
           delay: Math.random() * 5,
+          image: post.image,
           youtubeId: post.youtubeId,
           model: post.youtubeId ? undefined : (i % 2 === 0 ? telemetryModel : qualitySystemModel),
         })),
@@ -188,6 +192,7 @@ const MainContainer: React.FC = () => {
           title: post.title,
           link: `/projects/${post.id}`,
           delay: Math.random() * 5,
+          image: post.image,
           model: i % 2 === 0 ? qualitySystemModel : telemetryModel,
         })),
       ];
@@ -195,7 +200,19 @@ const MainContainer: React.FC = () => {
       
       const loader = new GLTFLoader();
       const objects: THREE_NS.Object3D[] = [];
-      const speedMultipliers = posts.map(() => [0.02, 0.03, 0.04][Math.floor(Math.random() * 3)]);
+
+      const makeAnimData = (x: number, y: number, zReset: number) => ({
+        x,
+        y,
+        zReset,
+        speed: [0.02, 0.03, 0.04][Math.floor(Math.random() * 3)],
+      });
+
+      const attachAnim = (obj: any, x: number, y: number, zReset: number) => {
+        obj.userData = obj.userData || {};
+        obj.userData.__anim = makeAnimData(x, y, zReset);
+      };
+
       const initialXs = posts.map(() => Math.random() * 30 - 15);
       const initialYs = posts.map(() => Math.random() * 16 - 8);
 
@@ -244,8 +261,52 @@ const MainContainer: React.FC = () => {
           const planeGeo = new THREE.PlaneGeometry(planeW, planeH);
           const planeMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
           const planeMesh = new THREE.Mesh(planeGeo, planeMat) as unknown as THREE_NS.Object3D;
-          (planeMesh as any).position.set(initialXs[index], initialYs[index], -20 - post.delay * 10);
+          const x = initialXs[index];
+          const y = initialYs[index];
+          const zReset = -20 - post.delay * 10;
+          (planeMesh as any).position.set(x, y, zReset);
           (planeMesh as any).userData = { link: post.link, postType: post.type, postId: post.id, youtubeId: post.youtubeId };
+          attachAnim(planeMesh as any, x, y, zReset);
+          (planeMesh as any).add(cssObject);
+          (scene as any).add(planeMesh);
+          (objects as any).push(planeMesh);
+          return;
+        }
+
+        // If a post has no model, render its image as a CSS3D card.
+        if (!post.model && post.image) {
+          const widthPx = 420;
+          const heightPx = 280;
+          const scale = 0.01;
+
+          const img = document.createElement('img');
+          img.width = widthPx;
+          img.height = heightPx;
+          img.src = post.image;
+          img.alt = post.title;
+          img.loading = 'lazy';
+          img.decoding = 'async';
+          img.draggable = false;
+          img.style.border = '0';
+          img.style.borderRadius = '14px';
+          img.style.background = 'transparent';
+          img.style.objectFit = 'cover';
+
+          const cssObject = new CSS3DObject(img);
+          (cssObject as any).position.set(0, 0, 0.01);
+          (cssObject as any).scale.set(scale, scale, scale);
+
+          const planeW = widthPx * scale;
+          const planeH = heightPx * scale;
+          const planeGeo = new THREE.PlaneGeometry(planeW, planeH);
+          const planeMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
+          const planeMesh = new THREE.Mesh(planeGeo, planeMat) as unknown as THREE_NS.Object3D;
+          const x = initialXs[index];
+          const y = initialYs[index];
+          const zReset = -20 - post.delay * 10;
+          (planeMesh as any).position.set(x, y, zReset);
+          (planeMesh as any).userData = { link: post.link, postType: post.type, postId: post.id };
+          attachAnim(planeMesh as any, x, y, zReset);
           (planeMesh as any).add(cssObject);
           (scene as any).add(planeMesh);
           (objects as any).push(planeMesh);
@@ -263,8 +324,12 @@ const MainContainer: React.FC = () => {
               const maxDim = Math.max(size.x, size.y, size.z);
               const scale = maxDim > 0 ? 4 / maxDim : 1;
               (model as any).scale.setScalar(scale);
-              (model as any).position.set(initialXs[index], initialYs[index], -20 - post.delay * 10);
+              const x = initialXs[index];
+              const y = initialYs[index];
+              const zReset = -20 - post.delay * 10;
+              (model as any).position.set(x, y, zReset);
               (model as any).userData = { link: post.link, postType: post.type, postId: post.id };
+              attachAnim(model as any, x, y, zReset);
               (scene as any).add(model);
               (objects as any).push(model);
             },
@@ -277,12 +342,44 @@ const MainContainer: React.FC = () => {
           const geometry = new THREE.BoxGeometry(2, 2, 2);
           const material = new THREE.MeshStandardMaterial({ color: 0x0077ff });
           const mesh = new THREE.Mesh(geometry, material) as unknown as THREE_NS.Object3D;
-          (mesh as any).position.set(initialXs[index], initialYs[index], -20 - post.delay * 10);
+          const x = initialXs[index];
+          const y = initialYs[index];
+          const zReset = -20 - post.delay * 10;
+          (mesh as any).position.set(x, y, zReset);
           (mesh as any).userData = { link: post.link, postType: post.type, postId: post.id };
+          attachAnim(mesh as any, x, y, zReset);
           (scene as any).add(mesh);
           (objects as any).push(mesh);
         }
       });
+
+      // Dedicated navigation object: clicking it routes to /quality-philosophy.
+      loader.load(
+        blogsNavModel,
+        (gltf: any) => {
+          const model = gltf.scene as unknown as THREE_NS.Object3D;
+          const box = new THREE.Box3().setFromObject(model);
+          const size = new THREE.Vector3();
+          box.getSize(size);
+          const maxDim = Math.max(size.x, size.y, size.z);
+          const scale = maxDim > 0 ? 4 / maxDim : 1;
+          (model as any).scale.setScalar(scale);
+
+          // Keep it stable and visible at the top-right.
+          // Move slightly down (Y) and closer to the camera (Z).
+          (model as any).position.set(8, 3, -10);
+          // Rotate 90° so it's not edge-on, and face it toward the camera.
+          (model as any).rotation.y = -Math.PI / 2;
+          (model as any).userData = { navTo: '/quality-philosophy' };
+
+          (scene as any).add(model);
+          (objects as any).push(model);
+        },
+        undefined,
+        (error: any) => {
+          console.error('An error occurred while loading the blogs nav model:', error);
+        }
+      );
 
       // Lighting
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -296,15 +393,16 @@ const MainContainer: React.FC = () => {
       const animate = () => {
         rafId = requestAnimationFrame(animate);
         if (!reduceMotion) {
-          (objects as any).forEach((obj: any, index: number) => {
-            if (obj.position) {
-              obj.position.z += speedMultipliers[index];
-              if (obj.position.z > 0) {
-                obj.position.z = -20 - posts[index].delay * 10;
-                obj.position.x = initialXs[index];
-                obj.position.y = initialYs[index];
-                speedMultipliers[index] = [0.02, 0.03, 0.04][Math.floor(Math.random() * 3)];
-              }
+          (objects as any).forEach((obj: any) => {
+            const anim = obj?.userData?.__anim;
+            if (!anim || !obj.position) return;
+
+            obj.position.z += anim.speed;
+            if (obj.position.z > 0) {
+              obj.position.z = anim.zReset;
+              obj.position.x = anim.x;
+              obj.position.y = anim.y;
+              anim.speed = [0.02, 0.03, 0.04][Math.floor(Math.random() * 3)];
             }
           });
         }
@@ -313,14 +411,14 @@ const MainContainer: React.FC = () => {
       };
       animate();
 
-      const findPostRoot = (obj: any) => {
+      const findInteractiveRoot = (obj: any) => {
         let current = obj;
         let data = current?.userData || {};
-        while (current && (!data.postType || !data.postId) && current.parent) {
+        while (current && (!data.navTo && (!data.postType || !data.postId)) && current.parent) {
           current = current.parent;
           data = current?.userData || {};
         }
-        return current && data.postType && data.postId ? current : null;
+        return current && (data.navTo || (data.postType && data.postId)) ? current : null;
       };
 
       let hovered: any = null;
@@ -356,7 +454,7 @@ const MainContainer: React.FC = () => {
         raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects(objects as any, true) as Array<any>;
         if (intersects.length > 0) {
-          const root = findPostRoot(intersects[0].object);
+          const root = findInteractiveRoot(intersects[0].object);
           setHovered(root);
         } else {
           setHovered(null);
@@ -377,8 +475,15 @@ const MainContainer: React.FC = () => {
         raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects(objects as any, true) as Array<any>;
         if (intersects.length > 0) {
-          const root = findPostRoot(intersects[0].object as any);
+          const root = findInteractiveRoot(intersects[0].object as any);
           const userData = (root as any)?.userData || {};
+
+          if (userData?.navTo === '/quality-philosophy') {
+            setPanelOpen(false);
+            navigate({ to: '/quality-philosophy' });
+            return;
+          }
+
           const { postType, postId } = userData || {};
           let found: BlogPost | VideoPost | ProjectPost | undefined;
           if (postType === 'quality') {
@@ -433,7 +538,7 @@ const MainContainer: React.FC = () => {
         }
         cleanup?.();
       };
-    }, []);
+    }, [navigate]);
 
     return (
       <div className="min-h-screen bg-gray-100 relative">
