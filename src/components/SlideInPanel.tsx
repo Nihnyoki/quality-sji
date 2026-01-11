@@ -151,7 +151,7 @@ const SlideInPanel: React.FC<SlideInPanelProps> = ({ isOpen, onClose, children }
               <div className="h-full overflow-y-auto px-4 sm:px-6 pb-10 pt-16 sm:pt-20">
                 <div className="relative rounded-2xl border border-gray-200 bg-white">
                   <div className="px-6 py-6 text-zinc-900">
-                    <div className="flex flex-col lg:flex-row gap-8 items-stretch">
+                    <div className="flex flex-col lg:flex-row gap-6 items-stretch">
                       <div className="min-w-0 flex-1">{children}</div>
 
                       <div className="hidden lg:flex shrink-0 items-stretch">

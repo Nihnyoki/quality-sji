@@ -231,6 +231,13 @@ const MainContainer: React.FC = () => {
         container.appendChild(cssRenderer.domElement);
 
       // Prepare posts
+      const randomQualityXYZ = (): [number, number, number] => {
+        const x = Math.random() * 30 - 15; // [-15, 15]
+        const y = Math.random() * 16 - 8; // [-8, 8]
+        const z = -20 - Math.random() * 50; // [-70, -20]
+        return [x, y, z];
+      };
+
       const posts: Array<{
         id: string;
         type: PostType;
@@ -242,19 +249,24 @@ const MainContainer: React.FC = () => {
         youtubeId?: string;
         position?: [number, number, number];
         rotationDeg?: [number, number, number];
+        randomizeOnReset?: boolean;
       }> = [
-        ...qualityPhilosophyPosts.map((post: BlogPost, i: number) => ({
+        ...qualityPhilosophyPosts.map((post: BlogPost, i: number) => {
+          const hasExplicitPosition = Boolean(post.position);
+          return {
           id: post.id,
           type: 'quality' as PostType,
           title: post.title,
           link: `/quality/${post.id}`,
           // If an explicit position is provided, do not add random delay-based Z offsets.
-          delay: post.position ? 0 : Math.random() * 5,
+          delay: hasExplicitPosition ? 0 : Math.random() * 5,
           image: post.image,
           model: post.model ?? (i % 2 === 0 ? qualitySystemModel : telemetryModel),
           position: post.position,
           rotationDeg: post.rotationDeg,
-        })),
+          randomizeOnReset: !hasExplicitPosition,
+          };
+        }),
         ...videoPosts.map((post: VideoPost, i: number) => ({
           id: post.id,
           type: 'video' as PostType,
@@ -280,20 +292,21 @@ const MainContainer: React.FC = () => {
       const loader = new GLTFLoader();
       const objects: THREE_NS.Object3D[] = [];
 
-      const makeAnimData = (x: number, y: number, zReset: number) => ({
+      const makeAnimData = (x: number, y: number, zReset: number, randomizeOnReset?: boolean) => ({
         x,
         y,
         zReset,
         speed: [0.02, 0.03, 0.04][Math.floor(Math.random() * 3)],
+        randomizeOnReset: Boolean(randomizeOnReset),
       });
 
-      const attachAnim = (obj: any, x: number, y: number, zReset: number) => {
+      const attachAnim = (obj: any, x: number, y: number, zReset: number, randomizeOnReset?: boolean) => {
         obj.userData = obj.userData || {};
-        obj.userData.__anim = makeAnimData(x, y, zReset);
+        obj.userData.__anim = makeAnimData(x, y, zReset, randomizeOnReset);
       };
 
-      const initialXs = posts.map((p) => (p.position?.[0] ?? (Math.random() * 30 - 15)));
-      const initialYs = posts.map((p) => (p.position?.[1] ?? (Math.random() * 16 - 8)));
+      const initialXs = posts.map((p) => (p.position?.[0] ?? randomQualityXYZ()[0]));
+      const initialYs = posts.map((p) => (p.position?.[1] ?? randomQualityXYZ()[1]));
       const initialZResets = posts.map((p) => (p.position?.[2] ?? (-20 - p.delay * 10)));
 
       posts.forEach((post, index) => {
@@ -347,7 +360,7 @@ const MainContainer: React.FC = () => {
           (planeMesh as any).position.set(x, y, zReset);
           applyRotationDeg(planeMesh as any, post.rotationDeg);
           (planeMesh as any).userData = { link: post.link, postType: post.type, postId: post.id, youtubeId: post.youtubeId };
-          attachAnim(planeMesh as any, x, y, zReset);
+          attachAnim(planeMesh as any, x, y, zReset, post.randomizeOnReset);
           (planeMesh as any).add(cssObject);
           (scene as any).add(planeMesh);
           (objects as any).push(planeMesh);
@@ -388,7 +401,7 @@ const MainContainer: React.FC = () => {
           (planeMesh as any).position.set(x, y, zReset);
           applyRotationDeg(planeMesh as any, post.rotationDeg);
           (planeMesh as any).userData = { link: post.link, postType: post.type, postId: post.id };
-          attachAnim(planeMesh as any, x, y, zReset);
+          attachAnim(planeMesh as any, x, y, zReset, post.randomizeOnReset);
           (planeMesh as any).add(cssObject);
           (scene as any).add(planeMesh);
           (objects as any).push(planeMesh);
@@ -412,7 +425,7 @@ const MainContainer: React.FC = () => {
               (model as any).position.set(x, y, zReset);
               applyRotationDeg(model as any, post.rotationDeg);
               (model as any).userData = { link: post.link, postType: post.type, postId: post.id };
-              attachAnim(model as any, x, y, zReset);
+              attachAnim(model as any, x, y, zReset, post.randomizeOnReset);
               (scene as any).add(model);
               (objects as any).push(model);
             },
@@ -431,7 +444,7 @@ const MainContainer: React.FC = () => {
           (mesh as any).position.set(x, y, zReset);
           applyRotationDeg(mesh as any, post.rotationDeg);
           (mesh as any).userData = { link: post.link, postType: post.type, postId: post.id };
-          attachAnim(mesh as any, x, y, zReset);
+          attachAnim(mesh as any, x, y, zReset, post.randomizeOnReset);
           (scene as any).add(mesh);
           (objects as any).push(mesh);
         }
@@ -519,6 +532,15 @@ const MainContainer: React.FC = () => {
 
             obj.position.z += anim.speed;
             if (obj.position.z > 0) {
+              if (anim.randomizeOnReset) {
+                const x = Math.random() * 30 - 15;
+                const y = Math.random() * 16 - 8;
+                const zReset = -20 - Math.random() * 50;
+                anim.x = x;
+                anim.y = y;
+                anim.zReset = zReset;
+              }
+
               obj.position.z = anim.zReset;
               obj.position.x = anim.x;
               obj.position.y = anim.y;
@@ -1022,6 +1044,12 @@ const MainContainer: React.FC = () => {
             </div>
           </div>
         </main>
+
+        <div className="px-4 sm:px-6 lg:px-8 pb-10 pointer-events-auto">
+          <div className="max-w-3xl mx-auto">
+            <CommentsSection postId="home" postType="quality" />
+          </div>
+        </div>
 
         {/* Footer */}
         <footer className="bg-slate-900 text-gray-100 py-8 border-t border-slate-800">

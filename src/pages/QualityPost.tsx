@@ -1,6 +1,7 @@
 import { Link, useParams } from '@tanstack/react-router'
 import { qualityPhilosophyPosts } from '../data/qualityPhilosophy'
 import PostContent from '../components/PostContent'
+import CommentsSection from '../components/CommentsSection'
 
 export default function QualityPost() {
   const { id } = useParams({ from: '/quality/$id' })
@@ -36,6 +37,10 @@ export default function QualityPost() {
       <section className="text-gray-800">
         <PostContent content={post.content} authorName={post.authorName} authorImage={post.authorImage} />
       </section>
+
+      <div className="mt-10">
+        <CommentsSection postId={post.id} postType="quality" />
+      </div>
     </article>
   )
 }

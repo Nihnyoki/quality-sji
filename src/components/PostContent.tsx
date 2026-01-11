@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from '@tanstack/react-router';
 
 type PostContentProps = {
   content: string[];
@@ -8,6 +9,75 @@ type PostContentProps = {
 
 function normalizeLine(line: string) {
   return line.replace(/\s+$/g, '');
+}
+
+function isExternalHref(href: string) {
+  return /^https?:\/\//i.test(href);
+}
+
+function renderInlineLinks(text: string, keyBase: string) {
+  const nodes: React.ReactNode[] = [];
+
+  // Supports:
+  // 1) Markdown links: [label](/path)
+  // 2) Shorthand: here (/path)
+  const re = /\[([^\]]+)\]\(([^)]+)\)|(\bhere\b)\s*\((\/[^)\s]+)\)/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = re.exec(text)) !== null) {
+    const start = match.index;
+    if (start > lastIndex) {
+      nodes.push(text.slice(lastIndex, start));
+    }
+
+    const mdLabel = match[1];
+    const mdHref = match[2];
+    const hereLabel = match[3];
+    const hereHref = match[4];
+
+    const label = (mdLabel ?? hereLabel ?? '').trim();
+    const href = (mdHref ?? hereHref ?? '').trim();
+
+    const key = `${keyBase}-${nodes.length}`;
+
+    if (label && href) {
+      if (href.startsWith('/') && !isExternalHref(href)) {
+        nodes.push(
+          <Link
+            key={key}
+            to={href}
+            onClick={() => window.scrollTo({ top: 0, left: 0 })}
+            className="font-medium text-zinc-900 underline hover:text-zinc-700"
+          >
+            {label}
+          </Link>
+        );
+      } else {
+        nodes.push(
+          <a
+            key={key}
+            href={href}
+            className="font-medium text-zinc-900 underline hover:text-zinc-700"
+            target={isExternalHref(href) ? '_blank' : undefined}
+            rel={isExternalHref(href) ? 'noreferrer' : undefined}
+          >
+            {label}
+          </a>
+        );
+      }
+    } else {
+      nodes.push(match[0]);
+    }
+
+    lastIndex = re.lastIndex;
+  }
+
+  if (lastIndex < text.length) {
+    nodes.push(text.slice(lastIndex));
+  }
+
+  return nodes.length === 1 ? nodes[0] : nodes;
 }
 
 export default function PostContent({ content, authorName, authorImage }: PostContentProps) {
@@ -29,7 +99,7 @@ export default function PostContent({ content, authorName, authorImage }: PostCo
             key={`li-${keyBase}-${i}`}
             className="relative pl-6 text-zinc-800 leading-relaxed before:absolute before:left-0 before:top-0 before:content-['➤'] before:text-zinc-700 before:drop-shadow-sm"
           >
-            {item}
+            {renderInlineLinks(item, `li-${keyBase}-${i}`)}
           </li>
         ))}
       </ul>
@@ -85,7 +155,7 @@ export default function PostContent({ content, authorName, authorImage }: PostCo
 
     blocks.push(
       <p key={`p-${index}`} className="text-zinc-700 leading-relaxed">
-        {trimmed}
+        {renderInlineLinks(trimmed, `p-${index}`)}
       </p>
     );
   });
