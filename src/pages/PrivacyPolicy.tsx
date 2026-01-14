@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router';
+import BackButton from '../components/BackButton';
 
 export default function PrivacyPolicy() {
   const resetConsent = () => {
@@ -56,12 +57,9 @@ export default function PrivacyPolicy() {
       </section>
 
       <div className="mt-10 flex flex-wrap gap-3">
-        <Link
-          to="/"
-          className="inline-flex items-center rounded-full border border-zinc-300 bg-white/70 px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-white"
-        >
-          Back home
-        </Link>
+        <BackButton className="inline-flex items-center rounded-full border border-zinc-300 bg-white/70 px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-white">
+          Back
+        </BackButton>
         <button
           type="button"
           onClick={resetConsent}

@@ -1,16 +1,14 @@
 import React from 'react';
 import { Link } from '@tanstack/react-router';
+import BackButton from '../components/BackButton';
 
 const SandileCV: React.FC = () => (
   <main className="min-h-screen bg-transparent">
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div className="mb-6">
-        <Link
-          to="/"
-          className="inline-flex items-center rounded-full border border-slate-700/60 bg-slate-900/45 px-4 py-2 text-sm font-medium text-slate-200/90 hover:bg-slate-900/65"
-        >
-          Back home
-        </Link>
+        <BackButton className="inline-flex items-center rounded-full border border-slate-700/60 bg-slate-900/45 px-4 py-2 text-sm font-medium text-slate-200/90 hover:bg-slate-900/65">
+          Back
+        </BackButton>
       </div>
 
       <section className="rounded-none border border-slate-700/60 bg-slate-900/35 backdrop-blur shadow-sm p-6">
