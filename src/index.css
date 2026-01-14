@@ -340,7 +340,7 @@
 /* Vertical stardust divider used between article and sidebar */
 .stardust-divider {
   position: relative;
-  width: 14px;
+  width: 8px;
   border-radius: 9999px;
   opacity: 0.85;
   background-image:
