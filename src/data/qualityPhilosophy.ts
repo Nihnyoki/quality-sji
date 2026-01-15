@@ -29,7 +29,7 @@ export const qualityPhilosophyPosts: BlogPost[] = [
       "",
       "## A dynamic test data approach",
       "Contrain the critical inputs to a valible range, and use a critiria based input selection for the test input parameters. This approach enables the non-critical inputs to vary dynamically.",
-      "This can be achieved by implementing a helper function that retrieves a valid test inputs record from a predefined dataset (for example, a JSON repository). One very good idea is to use production-aligned data that has been sanitized/anonymized for testing purposes. Additionally, [AI suggested(telemetry informed)](/) test scenarios should be implemented to archive a complete end-to-end tests automation quality system. Morking and stubbing can be used for non-critical external dependencies, However, mocking is not the ideal approach for the highest quality of signal-to-noise ratio.",
+      "This can be achieved by implementing a helper function that retrieves a valid test inputs record from a predefined dataset (for example, a JSON repository). One very good idea is to use production-aligned data that has been sanitized/anonymized for testing purposes. Additionally, [AI suggested(telemetry informed)](/quality/telemetry-tests-release-quality-cycle) test scenarios should be implemented to archive a complete end-to-end tests automation quality system. Morking and stubbing can be used for non-critical external dependencies, However, mocking is not the ideal approach for the highest quality of signal-to-noise ratio.",
       "",
       "Considering the valid criteria/range based input selection, each retrieved user must:",
       "* Satisfy the critical validity criteria required for the test",
