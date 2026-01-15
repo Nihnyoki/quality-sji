@@ -80,7 +80,7 @@ export const qualityPhilosophyPosts: BlogPost[] = [
       "",
       "## Cucumber Step Definition Example",
       "```java",
-      "/*The called service retrieves a user matching the criteria from the users repository.*/",
+      "//The called service retrieves a user matching the criteria from the users repository.",
       "@Given(\"a valid user exists in the users repository:\")",
       "public void aValidUserExistsInTheUsersRepository(DataTable dt) throws JsonProcessingException {",
       "    Response res = given()",
