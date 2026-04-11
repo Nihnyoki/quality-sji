@@ -202,7 +202,7 @@ export const qualityPhilosophyPosts: BlogPost[] = [
       "It happens when organisations choose to incentivise it."
     ],
     image: '/images/deadlines.webp',
-    model: '/images/flag-finish-model.glb',
+    model: '/images/dollar.glb',
     authorName: 'Sandile Mnqayi',
     authorImage: '/images/SandileMnqayi.jpeg'
   },
@@ -309,7 +309,7 @@ export const qualityPhilosophyPosts: BlogPost[] = [
       "AI tells us where risk and opportunity exist.",
       "Test automation ensures those insights are enforced before release.",
       "The release itself becomes the experiment — and telemetry delivers the verdict.",
-      "That verdict should then become a key input when prioritizing fixes for the next release cycle, tightening the [incentive model for quality](/quality/deadlines-enemy-of-quality).",
+      "The verdict then becomes a key input when prioritizing fixes for the next release cycle, tightening the [incentive model for quality](/quality/deadlines-enemy-of-quality).",
       "This is not faster testing.",
       "Thit is quality engineering driven by reality."
     ],
@@ -366,7 +366,7 @@ export const qualityPhilosophyPosts: BlogPost[] = [
       "Persistent quality at scale is only achievable through continuous feedback systems like [telemetry-informed testing cycles](/quality/telemetry-informed-testing-cycles).",
       "",
       "### Conceptual Link to QA",
-      "Quality is not a one-off achievement—it’s sustained effort. A “Ronaldo-like” QA mindset shows up as:",
+      "Quality is not a once-off achievement—it’s sustained effort. A “Ronaldo-like” QA mindset shows up as:",
       "",
       "- Persistent regression testing across releases - and reporting a timeline trend of feature/release perfomance.",
       "- Continuous improvement of automation frameworks - this means preparing automation scripts that support multiple environments and integrate with CI/CD pipelines.",

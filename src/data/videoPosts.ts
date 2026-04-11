@@ -13,10 +13,10 @@ export interface VideoPost {
 export const videoPosts: VideoPost[] = [
   {
     id: "video-2",
-    title: "Partial Dynamic Test Inputs",
+    title: "Dynamic Criteria Based Test Automation",
     subtitle: "Explorative Tests",
-    published: "2026-01-08",
-    youtubeId: 'ukwRYUE3cMk',
+    published: "2026-04-11",
+    youtubeId: '7CQa1KLeO-o',
     content: [
       "Keep critical inputs stable, but allow non-critical inputs to vary dynamically.",
       "Some of the most impactful defects appear during exploratory testing — often when people interact with the system in unexpected ways."
